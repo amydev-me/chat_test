@@ -1,0 +1,152 @@
+/* base */
+.application--wrap {
+    background-color: #F5F6F7;
+}
+.theme--light.v-pagination .v-pagination__item {
+    outline: none;
+}
+body::-webkit-scrollbar {
+    display: none;
+}
+.v-dialog::-webkit-scrollbar {
+    display: none;
+}
+.v-label{
+    font-size: 13px!important;
+}
+a:hover {
+    text-decoration: none;
+}
+/* body{
+    font-size: 62.5%;
+    padding: 0;
+    margin: 0;
+    right: 0;
+}
+a{
+    font-size: 1rem;
+} */
+/* @font-face {
+    font-family: 'Noto Sans Myanmar';
+    font-style: normal;
+    font-weight: 400;
+    src: url(//fonts.gstatic.com/ea/notosansmyanmar/v4/NotoSansMyanmar-Regular.eot);
+    src: url(//fonts.gstatic.com/ea/notosansmyanmar/v4/NotoSansMyanmar-Regular.eot?#iefix) format('embedded-opentype'),
+         url(//fonts.gstatic.com/ea/notosansmyanmar/v4/NotoSansMyanmar-Regular.woff2) format('woff2'),
+         url(//fonts.gstatic.com/ea/notosansmyanmar/v4/NotoSansMyanmar-Regular.woff) format('woff'),
+         url(//fonts.gstatic.com/ea/notosansmyanmar/v4/NotoSansMyanmar-Regular.ttf) format('truetype');
+  } */
+
+
+.btn.focus, .btn:focus, .btn:hover {
+    color: #fff;
+    text-decoration: none;
+    outline:none;
+}
+.v-btn{
+    text-transform: none!important;
+    cursor: pointer;
+}
+.profile_menu  .v-list__tile{
+    height: 35px;
+}
+.theme--light.v-pagination .v-pagination__item--active {
+    color: #fff;
+    background-color: #00b297!important;
+}
+/* invoice */
+.invoice--title{
+    font-size: 16px;
+    font-weight: 400;
+}
+.invoice--subtitle{
+    font-size:14px;
+}
+.invoice--titleph{
+    font-size:12px;
+}
+.invoice--card span{
+    font-size:13px;
+}
+.invoice--card td{
+    padding-right: 3px;
+}
+.invoice--card hr{
+    margin: 10px 0px!important;
+}
+.invoice--note{
+    width:101px;
+}
+@media only screen and (max-width: 599px){
+    .invoice--card{
+        font-size: 10px;
+    }
+    .invoice--card span{
+        font-size:11px;
+    }
+    .invoice--note{
+        width:73px;
+    }
+}
+/* 404 page */
+#page-404-bg{
+    background-image: url('../images/404page_cover.svg');
+    width: 100%;
+    height:calc(100vh - 0px);
+    background-position: center;
+    background-size: 100%;
+    background-color: #00b29775;
+}
+.margin-spacer{
+    padding:40px 0px;
+}
+.page-404-text{
+    font-family: 'Noto Serif', serif;
+}
+.page-404-text .maintitle{
+    font-size:75px;
+}
+.page-404-text .subtitle{
+    font-size:25px;
+}
+@media only screen and (max-width:599px){
+    .page-404-text{
+        margin-top:-12px;
+    }
+    .page-404-text .maintitle{
+        font-size:50px;
+    }
+    .page-404-text .subtitle{
+        font-size: 20px;
+    }
+}
+@media only screen and (min-width:768px){
+    .page-404-text{
+        margin-top:-7px!important;
+    }
+}
+@media only screen and (min-width:2000px){
+    .page-404-text{
+        margin-top:175px;
+    }
+}
+@media only screen
+and (min-device-width : 500px)
+and (max-device-width : 850px)
+and (orientation : landscape) {
+    .page-404-text{
+        margin-top:-70px;
+    }
+    .page-404-text .maintitle{
+        font-size:50px;
+    }
+    .page-404-text .subtitle{
+        font-size: 20px;
+    }
+}
+
+.chart-title{
+    text-align: center;
+    font-weight: 700;
+    color: gray;
+}

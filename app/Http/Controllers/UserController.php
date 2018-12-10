@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\MessageNotify;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Redis;
 use Lcobucci\JWT\Parser;
 
@@ -16,13 +17,12 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
-        if(Auth::attempt(['phone' => $request->phone, 'password' => $request->password])){
+        if (Auth::attempt(['phone' => $request->phone, 'password' => $request->password])) {
             $user = Auth::user();
-            $success['token'] =  $user->createToken('Personal Access Token')-> accessToken;
-            return response()->json(['success' => $success], $this-> successStatus);
-        }
-        else{
-            return response()->json(['error'=>'Unauthorised'], 401);
+            $success['token'] = $user->createToken('Personal Access Token')->accessToken;
+            return response()->json(['success' => $success], $this->successStatus);
+        } else {
+            return response()->json(['error' => 'Unauthorised'], 401);
         }
     }
 
@@ -34,20 +34,21 @@ class UserController extends Controller
 
         if (Auth::user()->tokens) {
             $access_token = Auth::user()->tokens->find($access_id);
-            $success =$access_token->revoke();
-            return response()->json(['success' => $success], $this-> successStatus);
+            $success = $access_token->revoke();
+            return response()->json(['success' => $success], $this->successStatus);
         }
-        return response()->json(['error'=>'Failed'], 401);
+        return response()->json(['error' => 'Failed'], 401);
     }
 
-    public function getData(){
-        return ['Apple','Android','Web'];
+    public function getData()
+    {
+        return ['Apple', 'Android', 'Web'];
     }
 
-    public function test(){
+    public function test(Request $request)
+    {
 
-
-
-        event(new MessageNotify());
+        Event::fire(new MessageNotify($request));
+        return response()->json(['success' => true], 200);
     }
 }

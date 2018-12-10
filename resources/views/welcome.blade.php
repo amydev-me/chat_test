@@ -9,90 +9,101 @@
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet" type="text/css">
 
-        <!-- Styles -->
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Nunito', sans-serif;
-                font-weight: 200;
-                height: 100vh;
-                margin: 0;
-            }
+        <link rel="stylesheet" type="text/css" media="screen" href="{{URL::asset('css/chat.css')}}" />
 
-            .full-height {
-                height: 100vh;
-            }
-
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
-
-            .position-ref {
-                position: relative;
-            }
-
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
-            .content {
-                text-align: center;
-            }
-
-            .title {
-                font-size: 84px;
-            }
-
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 13px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-        </style>
     </head>
     <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
 
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}">Register</a>
-                        @endif
-                    @endauth
-                </div>
-            @endif
+    <div class="container" id="app">
 
-            <div class="content">
-                <div class="title m-b-md">
-                    Laravel
-                </div>
-
-                <div class="links">
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://nova.laravel.com">Nova</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
-                </div>
-            </div>
+        <div class="member">
+            <div class="member-txt">Members</div>
+            <input type="text" v-model="user_id" placeholder="User Id" class="message-input">
+            <input type="text" v-model="send_to" placeholder="Send message to" class="message-input">
+            <ul class="member-item">
+                <li class="member-item-list">
+                    <img class="member-item-list-photo" src="{{URL::asset('images/joke.jpg')}}"><span class="member-item-list-name">huai siam</span>
+                </li>
+                <li class="member-item-list">
+                    <img class="member-item-list-photo" src="{{URL::asset('images/joke.jpg')}}"><span class="member-item-list-name">huai siam</span>
+                </li>
+            </ul>
         </div>
+        <div class="message">
+            <div class="message-txt">Messages</div>
+            <ul class="member-item">
+                <li v-for="msg in messages" class="member-item-list">
+                    <span>
+                        <img class="message-item-list-photo" src="{{URL::to('images/kiss.png')}}">
+                        <div class="message-item-list-txt">@{{ msg }}</div>
+                    </span>
+                </li>
+            </ul>
+            <form action="" @submit.prevent="emitData" class="message-compose">
+                <input type="text" class="message-input"  placeholder="Message Text..." v-model="message">
+                <button class="btn btn-default" type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+            {{--<div class="content" id="app">--}}
+                {{--<ul id="messages">--}}
+                    {{--<li v-for="msg in messages">--}}
+                        {{--@{{msg}}--}}
+                    {{--</li>--}}
+                {{--</ul>--}}
+
+                {{--<ul class="message-item">--}}
+                    {{--<li class="message-item-list" v-for="msg in messages">--}}
+                        {{--<span>--}}
+                            {{--<img class="message-item-list-photo" src="{{URL::to('images/kiss.png')}}">--}}
+                            {{--<div class="message-item-list-txt">@{{ msg }}</div>--}}
+                        {{--</span>--}}
+                        {{--<span>Huai Siam @ 7:30 PM</span>--}}
+                    {{--</li>--}}
+                {{--</ul>--}}
+                {{--<div class="message-compose">--}}
+                    {{--<form action="" @submit.prevent="emitData">--}}
+                        {{--<input type="text" class="message-input"  placeholder="Message Text..." v-model="message">--}}
+                        {{--<button class="btn btn-default" type="submit">Send</button>--}}
+                    {{--</form>--}}
+                {{--</div>--}}
+                {{--<form action="" @submit.prevent="emitData">--}}
+                    {{--<input id="m" autocomplete="off" v-model="message" /><button>Send</button>--}}
+                {{--</form>--}}
+            {{--</div>--}}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script>
+        var socket = io('http://localhost:3000');
+        const app=new Vue({
+            el: '#app',
+            data:function() {
+                return{
+                    message:null,
+                    messages: [],
+                    send_to:null,
+                    user_id:null
+                }
+            },
+            methods: {
+               emitData() {
+                   axios.post('/api/test', {message: this.message,send_to:this.send_to}).then((data) => {
+                        console.log('Sending....');
+                   });
+                   this.message = null;
+               }
+            },
+            mounted:function() {
+                socket.on("test-channel"+this.user_id+":App\\Events\\MessageNotify", function (data) {
+                    console.log(this.user_id)
+                    this.messages.push(data.request.message);
+                }.bind(this));
+            }
+        });
+    </script>
     </body>
 </html>
