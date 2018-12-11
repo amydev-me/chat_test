@@ -19,6 +19,7 @@
         <div class="member">
             <div class="member-txt">Members</div>
             <input type="text" v-model="user_id" placeholder="User Id" class="message-input">
+            <button class="btn btn-default" type="button" @click="onSocket">Send</button>
             <input type="text" v-model="send_to" placeholder="Send message to" class="message-input">
             <ul class="member-item">
                 <li class="member-item-list">
@@ -71,12 +72,12 @@
                     {{--<input id="m" autocomplete="off" v-model="message" /><button>Send</button>--}}
                 {{--</form>--}}
             {{--</div>--}}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    {{--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>--}}
+    {{--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>--}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    {{--<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>--}}
     <script>
         var socket = io('http://localhost:3000');
         const app=new Vue({
@@ -95,13 +96,15 @@
                         console.log('Sending....');
                    });
                    this.message = null;
-               }
+               },
+                onSocket(){
+                    socket.on("test-channel-" + this.user_id + ":App\\Events\\MessageNotify", function (data) {
+                        this.messages.push(data.request.message);
+                    }.bind(this));
+                }
             },
             mounted:function() {
-                socket.on("test-channel"+this.user_id+":App\\Events\\MessageNotify", function (data) {
-                    console.log(this.user_id)
-                    this.messages.push(data.request.message);
-                }.bind(this));
+                this.onSocket();
             }
         });
     </script>
