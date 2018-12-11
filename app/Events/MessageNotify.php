@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use Carbon\Carbon;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -14,7 +15,7 @@ class MessageNotify implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $request;
+    private $request;
 
     /**
      * Create a new event instance.
@@ -33,6 +34,16 @@ class MessageNotify implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return ['test-channel-'.$this->request['send_to']];
+        return ['chat-channel-' . $this->request['receiver_id']];
+    }
+
+    public function broadcastWith()
+    {
+
+        return [
+            'receiver_id' => $this->request['receiver_id'],
+            'send_at' => Carbon::now(),
+            'message' => $this->request['message']
+        ];
     }
 }

@@ -32,4 +32,12 @@ class User extends Authenticatable
     {
         return $this->where('phone', $identifier)->first();
     }
+
+    public function conversations(){
+        return $this->hasMany(Conversation::class);
+    }
+
+    public function conversation_replies(){
+        return $this->hasMany(ConversationReply::class);
+    }
 }

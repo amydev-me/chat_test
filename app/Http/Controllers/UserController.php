@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Conversation;
+use App\ConversationReply;
 use App\Events\MessageNotify;
 use App\User;
 use Illuminate\Http\Request;
@@ -48,8 +50,8 @@ class UserController extends Controller
     }
 
 
-    public function register(Request $request){
-
+    public function register(Request $request)
+    {
         $validator = Validator::make($request->all(),
             [
                 'phone' => 'required|unique:users',
@@ -61,27 +63,57 @@ class UserController extends Controller
             'display_name' => $request->display_name,
             'password' => Hash::make($request->password),
         ]);
-//
-//
-//        $token=null;
-//        $user_info = null;
-//
-//        if(Auth::attempt(['phone' =>  $request['phone'], 'password' => $request['password']])){
-//            $user_info = Auth::user();
-//            $token =  $user->createToken('Personal Access Token')-> accessToken;
-//        }else{
-//            return response()->json(['success'=>false,'user'=>$user_info,'access_token'=>$token]);
-//        }
-
-        return response()->json(['success'=>true,'user'=>$user_info,'access_token'=>$token]);
     }
 
-
-
-    public function test(Request $request)
+    public function sendConversation(Request $request)
     {
 
+        $first_user = Conversation::where('user_id_one', Auth::user()->id)->where('user_id_two', $request->receiver_id)->first();
+        $second_user = Conversation::where('user_id_one', $request->receiver_id)->where('user_id_two', Auth::user()->id)->first();
+//        if($first_user||$second_user){
+//            return 'yes';
+//        }else{
+//            return 'no';
+//        }
+//
+//
+//            return  response()->json(['first_user'=>$first_user,'second_user'=>$second_user]);
+        if ($first_user || $second_user) {
+            $conversation = ConversationReply::create([
+                'send_date' => Auth::user()->id,
+                'message' => $request->receiver_id,
+                'status' => 'Normal Chat',
+                'user_id' => Auth::user()->id,
+                'conversation_id' => $first_user ? $first_user->id : $second_user->id
+            ]);
+        } else {
+            $conversation = Conversation::create([
+                'user_id_one' => Auth::user()->id,
+                'user_id_two' => $request->receiver_id,
+                'room_title' => 'Normal Chat',
+                'room_type' => 'chat'
+            ]);
+            ConversationReply::create([
+                'send_date' => Auth::user()->id,
+                'message' => $request->message,
+                'status' => 'Normal Chat',
+                'user_id' => Auth::user()->id,
+                'conversation_id' => $conversation->id
+            ]);
+        }
         Event::fire(new MessageNotify($request));
-        return response()->json(['success' => true], 200);
+    }
+
+    public function loadConversations($id){
+
+
+        $first_user = Conversation::with('conversation_replies')->where('user_id_one', Auth::user()->id)->where('user_id_two',$id)->first();
+        $second_user = Conversation::with('conversation_replies')->where('user_id_one', $id)->where('user_id_two', Auth::user()->id)->first();
+        return  response()->json(['first_user'=>$first_user,'second_user'=>$second_user]);
+    }
+
+    public function getContacts(){
+        $users = User::where('id','<>',Auth::user()->id)->orderBy('display_name')->get();
+        return response()->json($users);
     }
 }
