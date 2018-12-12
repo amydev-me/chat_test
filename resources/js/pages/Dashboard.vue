@@ -14,6 +14,11 @@
                             <li id="status-offline"><span class="status-circle"></span> <p>Offline</p></li>
                         </ul>
                     </div>
+                    <div id="expanded">
+
+                        <button name="twitter" type="button" @click="logout">Logout</button>
+
+                    </div>
                 </div>
             </div>
             <div id="search">
@@ -40,34 +45,26 @@
                 <button id="settings"><i class="fa fa-cog fa-fw" aria-hidden="true"></i> <span>Settings</span></button>
             </div>
         </div>
-        <div class="content">
+        <div class="content" v-if="receiver_id==null">
+            Click member to send message
+        </div>
+        <div class="content" v-if="receiver_id!=null">
             <div class="contact-profile">
                 <img src="../../images/blank-avatar.png" alt="" />
-                <p>Amy Pyae Phyo Naing</p>
+                <p>{{receiver_name}}</p>
                 <div class="social-media">
                     <i class="fa fa-facebook" aria-hidden="true"></i>
                     <i class="fa fa-twitter" aria-hidden="true"></i>
                     <i class="fa fa-instagram" aria-hidden="true"></i>
                 </div>
             </div>
-            <div class="messages">
+            <div class="messages" >
                 <ul>
                     <li v-for="msg in messages" :class="bindClass(msg)">
-                        <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
+                        <img src="../../images/wow.jpg" alt="" />
                         <p>{{msg.message}}</p>
                     </li>
-                    <!--<li class="replies">-->
-                        <!--<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />-->
-                        <!--<p>When you're backed against the wall, break the god damn thing down.</p>-->
-                    <!--</li>-->
-                    <!--<li class="replies">-->
-                        <!--<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />-->
-                        <!--<p>Excuses don't win championships.</p>-->
-                    <!--</li>-->
-                    <!--<li class="sent">-->
-                        <!--<img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />-->
-                        <!--<p>Oh yeah, did Michael Jordan tell you that?</p>-->
-                    <!--</li>-->
+
                     <!--<li class="replies">-->
                         <!--<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />-->
                         <!--<p>No, I told him that.</p>-->
@@ -88,7 +85,7 @@
             </div>
             <div class="message-input">
                 <div class="wrap">
-                    <input type="text" placeholder="Aa" v-model="message"/>
+                    <input type="text" placeholder="Aa" v-model="message" v-on:keyup="onKeyUp"/>
                     <i class="fa fa-paperclip attachment" aria-hidden="true"></i>
                     <button class="button" @click="sendConversations"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
                 </div>
@@ -109,26 +106,34 @@
                 user_id: null,
                 contacts: [],
                 receiver_id: null,
-
-                socket: io('localhost:3000')
+                receiver_name:null,
+                socket: io('ec2-13-229-249-32.ap-southeast-1.compute.amazonaws.com:8080')
             };
         },
         methods: {
+            onKeyUp(e){
+                if (e.keyCode === 13) {
+                    this.sendConversations();
+                }
+            },
             bindClass(msg){
-                if(this.user_id == msg.id){
+
+                if(this.user_id == msg.user_id){
                     return 'replies'
                 }else{
                     return 'sent'
                 }
             },
             sendConversations() {
+                if(this.message==''){return;}
                 axios.post('/api/send-conversations', {
                     message: this.message,
                     receiver_id: this.receiver_id
-                }).then((data) => {
-
+                }).then(({data}) => {
+                    this.messages.push(data.conversation);
                 });
                 this.message = null;
+                $(".messages").animate({ scrollTop: $(document).height() }, "fast");
             },
             onSocket() {
                 this.socket.on("chat-channel-" + this.user_id + ":App\\Events\\MessageNotify", function (data) {
@@ -143,15 +148,26 @@
             },
             onClickedContact(contact) {
                 this.receiver_id = contact.id;
+                this.receiver_name = contact.display_name;
                 this.loadConversations();
             },
             loadConversations() {
                 axios.get('/api/get-conversations/' + this.receiver_id).then(({data}) => {
-                    this.messages = data;
+                    this.messages = data.conversation_replies;
+                    $(".messages").animate({ scrollTop: $(document).height() }, "fast");
                 });
+
+            },
+            logout(){
+                auth.logout();
             }
         },
         mounted() {
+            $(".expand-button").click(function() {
+                $("#profile").toggleClass("expanded");
+                $("#contacts").toggleClass("expanded");
+            });
+
             this.user_id = auth.getAuthInfo().id;
             this.user_name = auth.getAuthInfo().display_name;
             this.getContacts();

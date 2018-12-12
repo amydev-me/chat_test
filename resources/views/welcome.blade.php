@@ -18,7 +18,7 @@
     <div id="app">
         <app></app>
     </div>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script type="text/javascript" src="{{asset('js/admin/manifest.js') }}"></script>
     <script type="text/javascript" src="{{asset('js/admin/vendor.js') }}"></script>
     <script type="text/javascript" src="{{asset('js/admin/main.js') }}"></script>

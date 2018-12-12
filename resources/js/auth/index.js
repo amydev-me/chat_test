@@ -35,9 +35,16 @@ module.exports = {
     },
 
     logout() {
+        axios.get('/api/logout').then(({data}) => {
+
+
+        }).catch(error => {
+
+        })
         localStorage.removeItem('access_token')
         localStorage.removeItem('user_info')
-        this.user.authenticated = false
+        this.user.authenticated = false;
+        window.location.href='/login'
     },
 
     checkAuth() {

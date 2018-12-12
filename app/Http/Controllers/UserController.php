@@ -79,9 +79,9 @@ class UserController extends Controller
 //
 //            return  response()->json(['first_user'=>$first_user,'second_user'=>$second_user]);
         if ($first_user || $second_user) {
-            $conversation = ConversationReply::create([
+            $reply = ConversationReply::create([
                 'send_date' => Auth::user()->id,
-                'message' => $request->receiver_id,
+                'message' => $request->message,
                 'status' => 'Normal Chat',
                 'user_id' => Auth::user()->id,
                 'conversation_id' => $first_user ? $first_user->id : $second_user->id
@@ -93,7 +93,7 @@ class UserController extends Controller
                 'room_title' => 'Normal Chat',
                 'room_type' => 'chat'
             ]);
-            ConversationReply::create([
+            $reply=ConversationReply::create([
                 'send_date' => Auth::user()->id,
                 'message' => $request->message,
                 'status' => 'Normal Chat',
@@ -102,6 +102,9 @@ class UserController extends Controller
             ]);
         }
         Event::fire(new MessageNotify($request));
+
+
+        return response()->json(['conversation'=>$reply,'success'=>true],$this->successStatus);
     }
 
     public function loadConversations($id){
@@ -109,7 +112,7 @@ class UserController extends Controller
 
         $first_user = Conversation::with('conversation_replies')->where('user_id_one', Auth::user()->id)->where('user_id_two',$id)->first();
         $second_user = Conversation::with('conversation_replies')->where('user_id_one', $id)->where('user_id_two', Auth::user()->id)->first();
-        return  response()->json(['first_user'=>$first_user,'second_user'=>$second_user]);
+        return  response()->json($first_user?$first_user:$second_user);
     }
 
     public function getContacts(){

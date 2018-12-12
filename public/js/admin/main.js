@@ -181,9 +181,13 @@ module.exports = {
         }).catch(function (error) {});
     },
     logout: function logout() {
+        axios.get('/api/logout').then(function (_ref2) {
+            var data = _ref2.data;
+        }).catch(function (error) {});
         localStorage.removeItem('access_token');
         localStorage.removeItem('user_info');
         this.user.authenticated = false;
+        window.location.href = '/login';
     },
     checkAuth: function checkAuth() {
         var jwt = localStorage.getItem('access_token');

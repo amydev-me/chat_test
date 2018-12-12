@@ -5503,7 +5503,12 @@ module.exports = function(obj, fn){
 /* 70 */,
 /* 71 */,
 /* 72 */,
-/* 73 */,
+/* 73 */
+/***/ (function(module, exports) {
+
+module.exports = "/images/wow.jpg?e86f2667106783722fb7cf306e7275f3";
+
+/***/ }),
 /* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5646,9 +5651,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
 
 
 
@@ -5661,25 +5663,41 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             user_id: null,
             contacts: [],
             receiver_id: null,
-
-            socket: __WEBPACK_IMPORTED_MODULE_0_socket_io_client___default()('localhost:3000')
+            receiver_name: null,
+            socket: __WEBPACK_IMPORTED_MODULE_0_socket_io_client___default()('ec2-13-229-249-32.ap-southeast-1.compute.amazonaws.com:8080')
         };
     },
 
     methods: {
+        onKeyUp: function onKeyUp(e) {
+            if (e.keyCode === 13) {
+                this.sendConversations();
+            }
+        },
         bindClass: function bindClass(msg) {
-            if (this.user_id == msg.id) {
+
+            if (this.user_id == msg.user_id) {
                 return 'replies';
             } else {
                 return 'sent';
             }
         },
         sendConversations: function sendConversations() {
+            var _this = this;
+
+            if (this.message == '') {
+                return;
+            }
             axios.post('/api/send-conversations', {
                 message: this.message,
                 receiver_id: this.receiver_id
-            }).then(function (data) {});
+            }).then(function (_ref) {
+                var data = _ref.data;
+
+                _this.messages.push(data.conversation);
+            });
             this.message = null;
+            $(".messages").animate({ scrollTop: $(document).height() }, "fast");
         },
         onSocket: function onSocket() {
             this.socket.on("chat-channel-" + this.user_id + ":App\\Events\\MessageNotify", function (data) {
@@ -5688,29 +5706,39 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }.bind(this));
         },
         getContacts: function getContacts() {
-            var _this = this;
+            var _this2 = this;
 
-            axios.get('/api/get-contacts').then(function (_ref) {
-                var data = _ref.data;
+            axios.get('/api/get-contacts').then(function (_ref2) {
+                var data = _ref2.data;
 
-                _this.contacts = data;
+                _this2.contacts = data;
             });
         },
         onClickedContact: function onClickedContact(contact) {
             this.receiver_id = contact.id;
+            this.receiver_name = contact.display_name;
             this.loadConversations();
         },
         loadConversations: function loadConversations() {
-            var _this2 = this;
+            var _this3 = this;
 
-            axios.get('/api/get-conversations/' + this.receiver_id).then(function (_ref2) {
-                var data = _ref2.data;
+            axios.get('/api/get-conversations/' + this.receiver_id).then(function (_ref3) {
+                var data = _ref3.data;
 
-                _this2.messages = data;
+                _this3.messages = data.conversation_replies;
+                $(".messages").animate({ scrollTop: $(document).height() }, "fast");
             });
+        },
+        logout: function logout() {
+            auth.logout();
         }
     },
     mounted: function mounted() {
+        $(".expand-button").click(function () {
+            $("#profile").toggleClass("expanded");
+            $("#contacts").toggleClass("expanded");
+        });
+
         this.user_id = auth.getAuthInfo().id;
         this.user_name = auth.getAuthInfo().display_name;
         this.getContacts();
@@ -9087,7 +9115,18 @@ var render = function() {
             attrs: { "aria-hidden": "true" }
           }),
           _vm._v(" "),
-          _vm._m(0)
+          _vm._m(0),
+          _vm._v(" "),
+          _c("div", { attrs: { id: "expanded" } }, [
+            _c(
+              "button",
+              {
+                attrs: { name: "twitter", type: "button" },
+                on: { click: _vm.logout }
+              },
+              [_vm._v("Logout")]
+            )
+          ])
         ])
       ]),
       _vm._v(" "),
@@ -9135,68 +9174,82 @@ var render = function() {
       _vm._m(2)
     ]),
     _vm._v(" "),
-    _c("div", { staticClass: "content" }, [
-      _vm._m(3),
-      _vm._v(" "),
-      _c("div", { staticClass: "messages" }, [
-        _c(
-          "ul",
-          _vm._l(_vm.messages, function(msg) {
-            return _c("li", { class: _vm.bindClass(msg) }, [
-              _c("img", {
-                attrs: {
-                  src: "http://emilcarlsson.se/assets/mikeross.png",
-                  alt: ""
+    _vm.receiver_id == null
+      ? _c("div", { staticClass: "content" }, [
+          _vm._v("\n        Click member to send message\n    ")
+        ])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.receiver_id != null
+      ? _c("div", { staticClass: "content" }, [
+          _c("div", { staticClass: "contact-profile" }, [
+            _c("img", {
+              attrs: { src: __webpack_require__(56), alt: "" }
+            }),
+            _vm._v(" "),
+            _c("p", [_vm._v(_vm._s(_vm.receiver_name))]),
+            _vm._v(" "),
+            _vm._m(3)
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "messages" }, [
+            _c(
+              "ul",
+              _vm._l(_vm.messages, function(msg) {
+                return _c("li", { class: _vm.bindClass(msg) }, [
+                  _c("img", {
+                    attrs: { src: __webpack_require__(73), alt: "" }
+                  }),
+                  _vm._v(" "),
+                  _c("p", [_vm._v(_vm._s(msg.message))])
+                ])
+              })
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "message-input" }, [
+            _c("div", { staticClass: "wrap" }, [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.message,
+                    expression: "message"
+                  }
+                ],
+                attrs: { type: "text", placeholder: "Aa" },
+                domProps: { value: _vm.message },
+                on: {
+                  keyup: _vm.onKeyUp,
+                  input: function($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.message = $event.target.value
+                  }
                 }
               }),
               _vm._v(" "),
-              _c("p", [_vm._v(_vm._s(msg.message))])
-            ])
-          })
-        )
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "message-input" }, [
-        _c("div", { staticClass: "wrap" }, [
-          _c("input", {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.message,
-                expression: "message"
-              }
-            ],
-            attrs: { type: "text", placeholder: "Aa" },
-            domProps: { value: _vm.message },
-            on: {
-              input: function($event) {
-                if ($event.target.composing) {
-                  return
-                }
-                _vm.message = $event.target.value
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("i", {
-            staticClass: "fa fa-paperclip attachment",
-            attrs: { "aria-hidden": "true" }
-          }),
-          _vm._v(" "),
-          _c(
-            "button",
-            { staticClass: "button", on: { click: _vm.sendConversations } },
-            [
               _c("i", {
-                staticClass: "fa fa-paper-plane",
+                staticClass: "fa fa-paperclip attachment",
                 attrs: { "aria-hidden": "true" }
-              })
-            ]
-          )
+              }),
+              _vm._v(" "),
+              _c(
+                "button",
+                { staticClass: "button", on: { click: _vm.sendConversations } },
+                [
+                  _c("i", {
+                    staticClass: "fa fa-paper-plane",
+                    attrs: { "aria-hidden": "true" }
+                  })
+                ]
+              )
+            ])
+          ])
         ])
-      ])
-    ])
+      : _vm._e()
   ])
 }
 var staticRenderFns = [
@@ -9277,29 +9330,21 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "contact-profile" }, [
-      _c("img", {
-        attrs: { src: __webpack_require__(56), alt: "" }
+    return _c("div", { staticClass: "social-media" }, [
+      _c("i", {
+        staticClass: "fa fa-facebook",
+        attrs: { "aria-hidden": "true" }
       }),
       _vm._v(" "),
-      _c("p", [_vm._v("Amy Pyae Phyo Naing")]),
+      _c("i", {
+        staticClass: "fa fa-twitter",
+        attrs: { "aria-hidden": "true" }
+      }),
       _vm._v(" "),
-      _c("div", { staticClass: "social-media" }, [
-        _c("i", {
-          staticClass: "fa fa-facebook",
-          attrs: { "aria-hidden": "true" }
-        }),
-        _vm._v(" "),
-        _c("i", {
-          staticClass: "fa fa-twitter",
-          attrs: { "aria-hidden": "true" }
-        }),
-        _vm._v(" "),
-        _c("i", {
-          staticClass: "fa fa-instagram",
-          attrs: { "aria-hidden": "true" }
-        })
-      ])
+      _c("i", {
+        staticClass: "fa fa-instagram",
+        attrs: { "aria-hidden": "true" }
+      })
     ])
   }
 ]
