@@ -51,7 +51,7 @@
         <div class="content" v-if="receiver_id!=null">
             <div class="contact-profile">
                 <img src="../../images/blank-avatar.png" alt="" />
-                <p>{{receiver_name}}</p>
+                <p>{{receiver_name}} <span v-if="typing && (typing_id==user_id)">is typing..</span></p>
                 <div class="social-media">
                     <i class="fa fa-facebook" aria-hidden="true"></i>
                     <i class="fa fa-twitter" aria-hidden="true"></i>
@@ -100,6 +100,10 @@
     export default {
         data() {
             return {
+                typing_id:null,
+                typing:false,
+                is_typing:false,
+                time_out:null,
                 messages: [],
                 message: null,
                 user_name: null,
@@ -107,13 +111,34 @@
                 contacts: [],
                 receiver_id: null,
                 receiver_name:null,
-                socket: io('ec2-13-229-249-32.ap-southeast-1.compute.amazonaws.com:8080')
+                socket: io('localhost:3000')
             };
         },
         methods: {
             onKeyUp(e){
                 if (e.keyCode === 13) {
                     this.sendConversations();
+                }else{
+                    if(!this.is_typing){
+                        this.is_typing=true;
+                        this.socket.emit("typing", {is_typing:true,receiver_id:this.receiver_id});
+                        var that = this;
+                        this.time_out=setTimeout(function(){
+                            that.is_typing=false;
+                            that.typing_id=null;
+                            that.socket.emit("typing", {is_typing:false,receiver_id:that.receiver_id});
+                        },5000)
+                    }else{
+                        var that = this;
+                        this.time_out=null;
+
+                        this.time_out=setTimeout(function(){
+                            that.is_typing=false;
+                            that.typing_id=null;
+                            that.socket.emit("typing", {is_typing:false,receiver_id:that.receiver_id});
+                        },5000)
+                    }
+
                 }
             },
             bindClass(msg){
@@ -139,6 +164,12 @@
                 this.socket.on("chat-channel-" + this.user_id + ":App\\Events\\MessageNotify", function (data) {
 
                     this.messages.push(data);
+                }.bind(this));
+            },
+            onListenTyping(){
+                this.socket.on("client.typing." + this.user_id, function (data) {
+                    this.typing_id = data.receiver_id;
+                    this.typing = data.is_typing;
                 }.bind(this));
             },
             getContacts() {
@@ -172,6 +203,7 @@
             this.user_name = auth.getAuthInfo().display_name;
             this.getContacts();
             this.onSocket();
+            this.onListenTyping();
         }
     }
 </script>

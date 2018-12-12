@@ -70,14 +70,6 @@ class UserController extends Controller
 
         $first_user = Conversation::where('user_id_one', Auth::user()->id)->where('user_id_two', $request->receiver_id)->first();
         $second_user = Conversation::where('user_id_one', $request->receiver_id)->where('user_id_two', Auth::user()->id)->first();
-//        if($first_user||$second_user){
-//            return 'yes';
-//        }else{
-//            return 'no';
-//        }
-//
-//
-//            return  response()->json(['first_user'=>$first_user,'second_user'=>$second_user]);
         if ($first_user || $second_user) {
             $reply = ConversationReply::create([
                 'send_date' => Auth::user()->id,

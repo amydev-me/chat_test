@@ -4,6 +4,7 @@ namespace App\Events;
 
 use Carbon\Carbon;
 use Illuminate\Broadcasting\Channel;
+use Illuminate\Encryption\Encrypter;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -39,11 +40,11 @@ class MessageNotify implements ShouldBroadcast
 
     public function broadcastWith()
     {
-
+//        $crypt = Encrypter::generateKey('abcd');
         return [
             'receiver_id' => $this->request['receiver_id'],
             'send_at' => Carbon::now(),
-            'message' => $this->request['message']
+            'message' =>$this->request['message']
         ];
     }
 }

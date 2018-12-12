@@ -116,6 +116,17 @@ redis.on('pmessage', function(subscribed, channel, message) {
     message = JSON.parse(message);
     io.emit(channel + ':' + message.event, message.data);
 });
+
+io.on('connection', function(socket){
+    socket.on('typing',function(message){
+
+        console.log(message)
+        io.emit('client.typing.'+message.receiver_id, message);
+    });
+    socket.on('disconnect', function(){
+        io.emit('chat-message', 'User has disconnected');
+    });
+});
 // redis.subscribe('*', function(err, count) {});
 
 // redis.on('message', function(channel, message) {

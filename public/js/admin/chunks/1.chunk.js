@@ -6,13 +6,13 @@ webpackJsonp([1],{
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(69)
+  __webpack_require__(70)
 }
 var normalizeComponent = __webpack_require__(12)
 /* script */
-var __vue_script__ = __webpack_require__(71)
+var __vue_script__ = __webpack_require__(72)
 /* template */
-var __vue_template__ = __webpack_require__(72)
+var __vue_template__ = __webpack_require__(73)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -398,13 +398,20 @@ module.exports = function listToStyles (parentId, list) {
 
 /***/ }),
 
-/***/ 69:
+/***/ 52:
+/***/ (function(module, exports) {
+
+module.exports = "/images/wow.jpg?e86f2667106783722fb7cf306e7275f3";
+
+/***/ }),
+
+/***/ 70:
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(70);
+var content = __webpack_require__(71);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -425,7 +432,7 @@ if(false) {
 
 /***/ }),
 
-/***/ 70:
+/***/ 71:
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(49)(false);
@@ -440,7 +447,7 @@ exports.push([module.i, "\n.admin-login-card[data-v-3b6adb30]{\n    padding:0.5r
 
 /***/ }),
 
-/***/ 71:
+/***/ 72:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -490,7 +497,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 /***/ }),
 
-/***/ 72:
+/***/ 73:
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -577,7 +584,7 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("p", { staticClass: "h5" }, [
       _c("img", {
-        attrs: { src: __webpack_require__(73), width: "30%" }
+        attrs: { src: __webpack_require__(52), width: "30%" }
       })
     ])
   }
@@ -590,13 +597,6 @@ if (false) {
     require("vue-hot-reload-api")      .rerender("data-v-3b6adb30", module.exports)
   }
 }
-
-/***/ }),
-
-/***/ 73:
-/***/ (function(module, exports) {
-
-module.exports = "/images/wow.jpg?e86f2667106783722fb7cf306e7275f3";
 
 /***/ })
 
