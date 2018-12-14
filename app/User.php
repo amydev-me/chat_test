@@ -16,7 +16,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'display_name', 'phone', 'password',
+        'display_name', 'phone', 'password', 'is_active'
     ];
 
     /**
@@ -33,11 +33,18 @@ class User extends Authenticatable
         return $this->where('phone', $identifier)->first();
     }
 
-    public function conversations(){
+    public function conversations()
+    {
         return $this->hasMany(Conversation::class);
     }
 
-    public function conversation_replies(){
+    public function conversation_replies()
+    {
         return $this->hasMany(ConversationReply::class);
+    }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class);
     }
 }

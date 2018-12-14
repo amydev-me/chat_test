@@ -1,5 +1,24 @@
 <template>
     <div id="frame">
+        <div class="modal"  role="dialog" id="myModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Modal body text goes here.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="sidepanel">
             <div id="profile">
                 <div class="wrap">
@@ -15,7 +34,7 @@
                         </ul>
                     </div>
                     <div id="expanded">
-
+                        <button name="twitter" type="button" @click="showGroupDialog">Group</button>
                         <button name="twitter" type="button" @click="logout">Logout</button>
 
                     </div>
@@ -51,7 +70,7 @@
         <div class="content" v-if="receiver_id!=null">
             <div class="contact-profile">
                 <img src="../../images/blank-avatar.png" alt="" />
-                <p>{{receiver_name}} <span v-if="typing && (typing_id==user_id)">is typing..</span></p>
+                <p>{{receiver_name}} <span v-if="typing_id==receiver_id">is typing..</span></p>
                 <div class="social-media">
                     <i class="fa fa-facebook" aria-hidden="true"></i>
                     <i class="fa fa-twitter" aria-hidden="true"></i>
@@ -100,57 +119,60 @@
     export default {
         data() {
             return {
-                typing_id:null,
-                typing:false,
-                is_typing:false,
-                time_out:null,
+                typing_id: null,
+                typing: false,
+                is_typing: false,
+                time_out: null,
                 messages: [],
                 message: null,
                 user_name: null,
                 user_id: null,
                 contacts: [],
                 receiver_id: null,
-                receiver_name:null,
-                socket: io('localhost:3000')
+                receiver_name: null,
+                socket: io('localhost:3000'),
+                groups_contacts:[],
+                group_name:null
             };
         },
         methods: {
-            onKeyUp(e){
+            onKeyUp(e) {
                 if (e.keyCode === 13) {
                     this.sendConversations();
-                }else{
-                    if(!this.is_typing){
-                        this.is_typing=true;
-                        this.socket.emit("typing", {is_typing:true,receiver_id:this.receiver_id});
+                } else {
+                    if (!this.is_typing) {
+                        this.is_typing = true;
+                        this.socket.emit("typing", {is_typing: true, receiver_id: this.receiver_id,sender_id:this.user_id});
                         var that = this;
-                        this.time_out=setTimeout(function(){
-                            that.is_typing=false;
-                            that.typing_id=null;
-                            that.socket.emit("typing", {is_typing:false,receiver_id:that.receiver_id});
-                        },5000)
-                    }else{
+                        this.time_out = setTimeout(function () {
+                            that.is_typing = false;
+                            // that.typing_id = null;
+                            that.socket.emit("typing", {is_typing: false, receiver_id: that.receiver_id,sender_id:this.user_id});
+                        }, 5000)
+                    } else {
                         var that = this;
-                        this.time_out=null;
+                        this.time_out = null;
 
-                        this.time_out=setTimeout(function(){
-                            that.is_typing=false;
-                            that.typing_id=null;
-                            that.socket.emit("typing", {is_typing:false,receiver_id:that.receiver_id});
-                        },5000)
+                        this.time_out = setTimeout(function () {
+                            that.is_typing = false;
+                            // that.typing_id = null;
+                            that.socket.emit("typing", {is_typing: false, receiver_id: that.receiver_id,sender_id:this.user_id});
+                        }, 5000)
                     }
-
                 }
             },
-            bindClass(msg){
+            bindClass(msg) {
 
-                if(this.user_id == msg.user_id){
+                if (this.user_id == msg.user_id) {
                     return 'replies'
-                }else{
+                } else {
                     return 'sent'
                 }
             },
             sendConversations() {
-                if(this.message==''){return;}
+                if (this.message == '') {
+                    return;
+                }
                 axios.post('/api/send-conversations', {
                     message: this.message,
                     receiver_id: this.receiver_id
@@ -158,17 +180,18 @@
                     this.messages.push(data.conversation);
                 });
                 this.message = null;
-                $(".messages").animate({ scrollTop: $(document).height() }, "fast");
+                $(".messages").animate({scrollTop: $(document).height()}, "fast");
             },
             onSocket() {
-                this.socket.on("chat-channel-" + this.user_id + ":App\\Events\\MessageNotify", function (data) {
+                this.socket.on("private-chat-channel-" + this.user_id + ":App\\Events\\MessageNotify", function (data) {
 
                     this.messages.push(data);
                 }.bind(this));
             },
-            onListenTyping(){
+            onListenTyping() {
                 this.socket.on("client.typing." + this.user_id, function (data) {
-                    this.typing_id = data.receiver_id;
+                    console.log(data)
+                    this.typing_id = data.sender_id;
                     this.typing = data.is_typing;
                 }.bind(this));
             },
@@ -185,22 +208,31 @@
             loadConversations() {
                 axios.get('/api/get-conversations/' + this.receiver_id).then(({data}) => {
                     this.messages = data.conversation_replies;
-                    $(".messages").animate({ scrollTop: $(document).height() }, "fast");
+                    $(".messages").animate({scrollTop: $(document).height()}, "fast");
                 });
 
             },
-            logout(){
+            onListenUserConnected(){
+                this.socket.on("broadcast", function (data) {
+                    console.log(data)
+                }.bind(this));
+            },
+            logout() {
                 auth.logout();
+            },
+            showGroupDialog(){
+                $('#myModal').modal('show');
             }
         },
         mounted() {
-            $(".expand-button").click(function() {
+            $(".expand-button").click(function () {
                 $("#profile").toggleClass("expanded");
                 $("#contacts").toggleClass("expanded");
             });
 
             this.user_id = auth.getAuthInfo().id;
             this.user_name = auth.getAuthInfo().display_name;
+            this.socket.on('broadcast', m => console.log('Received broadcast:', m));
             this.getContacts();
             this.onSocket();
             this.onListenTyping();

@@ -5651,6 +5651,27 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -5679,12 +5700,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             } else {
                 if (!this.is_typing) {
                     this.is_typing = true;
-                    this.socket.emit("typing", { is_typing: true, sender_id: that.user_id });
+                    this.socket.emit("typing", { is_typing: true, receiver_id: this.receiver_id, sender_id: this.user_id });
                     var that = this;
                     this.time_out = setTimeout(function () {
                         that.is_typing = false;
-                        that.typing_id = null;
-                        that.socket.emit("typing", { is_typing: false, sender_id: that.user_id });
+                        // that.typing_id = null;
+                        that.socket.emit("typing", { is_typing: false, receiver_id: that.receiver_id, sender_id: this.user_id });
                     }, 5000);
                 } else {
                     var that = this;
@@ -5692,8 +5713,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                     this.time_out = setTimeout(function () {
                         that.is_typing = false;
-                        that.typing_id = null;
-                        that.socket.emit("typing", { is_typing: false, sender_id: that.user_id });
+                        // that.typing_id = null;
+                        that.socket.emit("typing", { is_typing: false, receiver_id: that.receiver_id, sender_id: this.user_id });
                     }, 5000);
                 }
             }
@@ -5724,13 +5745,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             $(".messages").animate({ scrollTop: $(document).height() }, "fast");
         },
         onSocket: function onSocket() {
-            this.socket.on("chat-channel-" + this.user_id + ":App\\Events\\MessageNotify", function (data) {
+            this.socket.on("private-chat-channel-" + this.user_id + ":App\\Events\\MessageNotify", function (data) {
 
                 this.messages.push(data);
             }.bind(this));
         },
         onListenTyping: function onListenTyping() {
             this.socket.on("client.typing." + this.user_id, function (data) {
+                console.log(data);
                 this.typing_id = data.sender_id;
                 this.typing = data.is_typing;
             }.bind(this));
@@ -5759,8 +5781,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 $(".messages").animate({ scrollTop: $(document).height() }, "fast");
             });
         },
+        onListenUserConnected: function onListenUserConnected() {
+            this.socket.on("broadcast", function (data) {
+                console.log(data);
+            }.bind(this));
+        },
         logout: function logout() {
             auth.logout();
+        },
+        showGroupDialog: function showGroupDialog() {
+            $('#myModal').modal('show');
         }
     },
     mounted: function mounted() {
@@ -5771,6 +5801,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
         this.user_id = auth.getAuthInfo().id;
         this.user_name = auth.getAuthInfo().display_name;
+        this.socket.on('broadcast', function (m) {
+            return console.log('Received broadcast:', m);
+        });
         this.getContacts();
         this.onSocket();
         this.onListenTyping();
@@ -9127,6 +9160,8 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { attrs: { id: "frame" } }, [
+    _vm._m(0),
+    _vm._v(" "),
     _c("div", { attrs: { id: "sidepanel" } }, [
       _c("div", { attrs: { id: "profile" } }, [
         _c("div", { staticClass: "wrap" }, [
@@ -9146,9 +9181,18 @@ var render = function() {
             attrs: { "aria-hidden": "true" }
           }),
           _vm._v(" "),
-          _vm._m(0),
+          _vm._m(1),
           _vm._v(" "),
           _c("div", { attrs: { id: "expanded" } }, [
+            _c(
+              "button",
+              {
+                attrs: { name: "twitter", type: "button" },
+                on: { click: _vm.showGroupDialog }
+              },
+              [_vm._v("Group")]
+            ),
+            _vm._v(" "),
             _c(
               "button",
               {
@@ -9161,7 +9205,7 @@ var render = function() {
         ])
       ]),
       _vm._v(" "),
-      _vm._m(1),
+      _vm._m(2),
       _vm._v(" "),
       _c("div", { attrs: { id: "contacts" } }, [
         _c(
@@ -9202,7 +9246,7 @@ var render = function() {
         )
       ]),
       _vm._v(" "),
-      _vm._m(2)
+      _vm._m(3)
     ]),
     _vm._v(" "),
     _vm.receiver_id == null
@@ -9220,12 +9264,12 @@ var render = function() {
             _vm._v(" "),
             _c("p", [
               _vm._v(_vm._s(_vm.receiver_name) + " "),
-              _vm.typing && _vm.typing_id == _vm.user_id
+              _vm.typing_id == _vm.receiver_id
                 ? _c("span", [_vm._v("is typing..")])
                 : _vm._e()
             ]),
             _vm._v(" "),
-            _vm._m(3)
+            _vm._m(4)
           ]),
           _vm._v(" "),
           _c("div", { staticClass: "messages" }, [
@@ -9289,6 +9333,68 @@ var render = function() {
   ])
 }
 var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "modal", attrs: { role: "dialog", id: "myModal" } },
+      [
+        _c(
+          "div",
+          { staticClass: "modal-dialog", attrs: { role: "document" } },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h5", { staticClass: "modal-title" }, [
+                  _vm._v("Modal title")
+                ]),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: {
+                      type: "button",
+                      "data-dismiss": "modal",
+                      "aria-label": "Close"
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c("p", [_vm._v("Modal body text goes here.")])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  { staticClass: "btn btn-primary", attrs: { type: "button" } },
+                  [_vm._v("Save changes")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button", "data-dismiss": "modal" }
+                  },
+                  [_vm._v("Close")]
+                )
+              ])
+            ])
+          ]
+        )
+      ]
+    )
+  },
   function() {
     var _vm = this
     var _h = _vm.$createElement

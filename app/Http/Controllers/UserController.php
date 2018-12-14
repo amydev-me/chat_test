@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Conversation;
 use App\ConversationReply;
 use App\Events\MessageNotify;
+use App\Group;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -100,8 +101,6 @@ class UserController extends Controller
     }
 
     public function loadConversations($id){
-
-
         $first_user = Conversation::with('conversation_replies')->where('user_id_one', Auth::user()->id)->where('user_id_two',$id)->first();
         $second_user = Conversation::with('conversation_replies')->where('user_id_one', $id)->where('user_id_two', Auth::user()->id)->first();
         return  response()->json($first_user?$first_user:$second_user);
@@ -110,5 +109,13 @@ class UserController extends Controller
     public function getContacts(){
         $users = User::where('id','<>',Auth::user()->id)->orderBy('display_name')->get();
         return response()->json($users);
+    }
+
+    public function createGroup(Request $request){
+        $group= Group::create($request->all());
+
+        if($group){
+            $group->attach($request->users);
+        }
     }
 }
