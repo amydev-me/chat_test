@@ -15,15 +15,11 @@ class CreateConversationsTable extends Migration
     {
         Schema::create('conversations', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('room_title')->nullable();
-            $table->string('room_type')->nullable();
-            $table->string('status')->nullable();
-            $table->unsignedInteger('user_id_one')->nullable();
-            $table->unsignedInteger('user_id_two')->nullable();
-
+            $table->string('title')->nullable();
+            $table->unsignedInteger('creator_id')->nullable();
+            $table->string('channel_id',50)->nullable();
             $table->timestamps();
-            $table->foreign('user_id_one')->references('id')->on('users')->onDelete('set null');
-            $table->foreign('user_id_two')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('creator_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 

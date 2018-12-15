@@ -10,10 +10,15 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <p>Modal body text goes here.</p>
+                        <input type="text" class="form-control" value="group_name" v-model="group_name" placeholder="Type Group Name">
+                        <ul>
+                            <li v-for="(ctc,y) in groups_contacts" :key="y">
+                                <input type="checkbox" v-model="selected" :value="ctc.id">
+                                {{ctc.display_name}}</li>
+                        </ul>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary">Save changes</button>
+                        <button type="button" class="btn btn-primary" @click="createGroup">Create Group</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -46,17 +51,28 @@
             </div>
             <div id="contacts">
                 <ul>
-                    <li class="contact" v-for="contact in contacts" @click="onClickedContact(contact)">
+                    <li class="contact" v-for="con in conversations" @click="onClickedContact(con)">
                         <div class="wrap">
                             <span class="contact-status online"></span>
                             <img src="../../images/blank-avatar.png" alt="" />
                             <div class="meta">
-                                <p class="name">{{contact.display_name}}</p>
+                                <p class="name">
+                                    {{con.contact_name}}
+                                </p>
                                 <p class="preview">Hay!!!</p>
                             </div>
                         </div>
                     </li>
-
+                    <li class="contact" v-for="gp in groups" @click="onClickedGroup(gp)">
+                        <div class="wrap">
+                            <span class="contact-status online"></span>
+                            <img src="../../images/blank-avatar.png" alt="" />
+                            <div class="meta">
+                                <p class="name">{{gp.group_name}}</p>
+                                <p class="preview">Hay!!!</p>
+                            </div>
+                        </div>
+                    </li>
                 </ul>
             </div>
             <div id="bottom-bar">
@@ -79,27 +95,10 @@
             </div>
             <div class="messages" >
                 <ul>
-                    <li v-for="msg in messages" :class="bindClass(msg)">
+                    <li v-for="msg in messages">
                         <img src="../../images/wow.jpg" alt="" />
                         <p>{{msg.message}}</p>
                     </li>
-
-                    <!--<li class="replies">-->
-                        <!--<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />-->
-                        <!--<p>No, I told him that.</p>-->
-                    <!--</li>-->
-                    <!--<li class="replies">-->
-                        <!--<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />-->
-                        <!--<p>What are your choices when someone puts a gun to your head?</p>-->
-                    <!--</li>-->
-                    <!--<li class="sent">-->
-                        <!--<img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />-->
-                        <!--<p>What are you talking about? You do what they say or they shoot you.</p>-->
-                    <!--</li>-->
-                    <!--<li class="replies">-->
-                        <!--<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />-->
-                        <!--<p>Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>-->
-                    <!--</li>-->
                 </ul>
             </div>
             <div class="message-input">
@@ -119,6 +118,7 @@
     export default {
         data() {
             return {
+                is_group:false,
                 typing_id: null,
                 typing: false,
                 is_typing: false,
@@ -132,10 +132,32 @@
                 receiver_name: null,
                 socket: io('localhost:3000'),
                 groups_contacts:[],
-                group_name:null
+                group_name:null,
+                selected:[],
+                groups:[],
+                conversations:[],
+                channel_id:null
+
             };
         },
         methods: {
+            getContacts() {
+                axios.get('/api/get-contacts').then(({data}) => {
+                    this.contacts = data;
+                });
+            },
+            getGroups(){
+                axios.get('/api/get-groups').then(({data}) => {
+                    this.groups = data;
+                });
+            },
+            loadConversations() {
+                axios.get('/api/get-conversations').then(({data}) => {
+                    this.conversations = data;
+                    // $(".messages").animate({scrollTop: $(document).height()}, "fast");
+                });
+
+            },
             onKeyUp(e) {
                 if (e.keyCode === 13) {
                     this.sendConversations();
@@ -163,65 +185,81 @@
             },
             bindClass(msg) {
 
-                if (this.user_id == msg.user_id) {
-                    return 'replies'
-                } else {
-                    return 'sent'
-                }
+                // if (this.user_id == msg.user_id) {
+                //     return 'replies'
+                // } else {
+                //     return 'sent'
+                // }
             },
             sendConversations() {
-                if (this.message == '') {
+                if (this.message == '' || this.message ==null) {
                     return;
                 }
-                axios.post('/api/send-conversations', {
+
+
+
+                axios.post('/api/send-message', {
                     message: this.message,
-                    receiver_id: this.receiver_id
+                    message_type:'text',
+                    conversation_id: this.receiver_id
                 }).then(({data}) => {
                     this.messages.push(data.conversation);
                 });
+
+
                 this.message = null;
-                $(".messages").animate({scrollTop: $(document).height()}, "fast");
+                // $(".messages").animate({scrollTop: $(document).height()}, "fast");
             },
             onSocket() {
-                this.socket.on("private-chat-channel-" + this.user_id + ":App\\Events\\MessageNotify", function (data) {
-
+                this.socket.on("private-chat-channel-" + this.receiver_id + ":App\\Events\\MessageNotify", function (data) {
+                    console.log(data)
                     this.messages.push(data);
                 }.bind(this));
             },
             onListenTyping() {
                 this.socket.on("client.typing." + this.user_id, function (data) {
-                    console.log(data)
                     this.typing_id = data.sender_id;
                     this.typing = data.is_typing;
                 }.bind(this));
-            },
-            getContacts() {
-                axios.get('/api/get-contacts').then(({data}) => {
-                    this.contacts = data;
-                });
-            },
-            onClickedContact(contact) {
-                this.receiver_id = contact.id;
-                this.receiver_name = contact.display_name;
-                this.loadConversations();
-            },
-            loadConversations() {
-                axios.get('/api/get-conversations/' + this.receiver_id).then(({data}) => {
-                    this.messages = data.conversation_replies;
-                    $(".messages").animate({scrollTop: $(document).height()}, "fast");
-                });
-
             },
             onListenUserConnected(){
                 this.socket.on("broadcast", function (data) {
                     console.log(data)
                 }.bind(this));
             },
+            onListenGroupConversations(){
+                this.socket.on("private-groups-chat-" + this.receiver_id +":App\\Events\\GroupMessage", function (data) {
+                    console.log(data)
+                    this.messages.push(data);
+                }.bind(this));
+            },
             logout() {
                 auth.logout();
             },
-            showGroupDialog(){
+            showGroupDialog() {
+                this.group_name=null;
+                this.selected=[];
+                this.groups_contacts = Array.from(Object.create(this.contacts));
                 $('#myModal').modal('show');
+            },
+
+            createGroup(){
+                axios.post('/api/create-group',{group_name: this.group_name,users:this.selected}).then(({data})=>{
+
+                });
+            },
+            onClickedContact(contact) {
+                this.is_group=false;
+                this.receiver_id = contact.conversation_id;
+                this.receiver_name = contact.contact_name;
+                this.onSocket();
+                // this.loadConversations();
+            },
+            onClickedGroup(gp){
+                this.is_group=true;
+                this.receiver_id = gp.id;
+                this.receiver_name = gp.group_name;
+                this.onListenGroupConversations();
             }
         },
         mounted() {
@@ -232,10 +270,32 @@
 
             this.user_id = auth.getAuthInfo().id;
             this.user_name = auth.getAuthInfo().display_name;
-            this.socket.on('broadcast', m => console.log('Received broadcast:', m));
-            this.getContacts();
-            this.onSocket();
-            this.onListenTyping();
+
+            this.loadConversations();
+            // this.socket.on('broadcast', m => console.log('Received broadcast:', m));
+            // this.getContacts();
+            // this.getGroups();
+
+            // this.onListen    Typing();
+        },
+        computed:{
+            selectAll: {
+                get: function () {
+                    if(this.groups_contacts.length<=0){
+                        return false;
+                    }
+                    return this.groups_contacts ? this.selected.length == this.groups_contacts.length : false;
+                },
+                set: function (value) {
+                    var selected = [];
+                    if (value) {
+                        this.groups_contacts.forEach(function (user) {
+                            selected.push(user);
+                        });
+                    }
+                    this.selected = selected;
+                }
+            },
         }
     }
 </script>

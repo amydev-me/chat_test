@@ -3,17 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Conversation;
-use App\ConversationReply;
 use App\Events\MessageNotify;
-use App\Group;
+use App\Message;
+use App\Participant;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Redis;
 use Lcobucci\JWT\Parser;
-use Validator;
 class UserController extends Controller
 {
 
@@ -25,7 +23,7 @@ class UserController extends Controller
         if (Auth::attempt(['phone' => $request->phone, 'password' => $request->password])) {
             $user = Auth::user();
             $success['token'] = $user->createToken('Personal Access Token')->accessToken;
-            return response()->json(['success' => $success,'access_token'=>$success['token'],'user'=>$user], $this->successStatus);
+            return response()->json(['success' => $success, 'access_token' => $success['token'], 'user' => $user], $this->successStatus);
         } else {
             return response()->json(['error' => 'Unauthorised'], 401);
         }
@@ -45,12 +43,6 @@ class UserController extends Controller
         return response()->json(['error' => 'Failed'], 401);
     }
 
-    public function getData()
-    {
-        return ['Apple', 'Android', 'Web'];
-    }
-
-
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(),
@@ -66,56 +58,30 @@ class UserController extends Controller
         ]);
     }
 
-    public function sendConversation(Request $request)
-    {
+    public function getConversations(){
+        $user_id = Auth::user()->id;
 
-        $first_user = Conversation::where('user_id_one', Auth::user()->id)->where('user_id_two', $request->receiver_id)->first();
-        $second_user = Conversation::where('user_id_one', $request->receiver_id)->where('user_id_two', Auth::user()->id)->first();
-        if ($first_user || $second_user) {
-            $reply = ConversationReply::create([
-                'send_date' => Auth::user()->id,
-                'message' => $request->message,
-                'status' => 'Normal Chat',
-                'user_id' => Auth::user()->id,
-                'conversation_id' => $first_user ? $first_user->id : $second_user->id
-            ]);
-        } else {
-            $conversation = Conversation::create([
-                'user_id_one' => Auth::user()->id,
-                'user_id_two' => $request->receiver_id,
-                'room_title' => 'Normal Chat',
-                'room_type' => 'chat'
-            ]);
-            $reply=ConversationReply::create([
-                'send_date' => Auth::user()->id,
-                'message' => $request->message,
-                'status' => 'Normal Chat',
-                'user_id' => Auth::user()->id,
-                'conversation_id' => $conversation->id
-            ]);
+         $conversations_id = Participant::where('user_id',Auth::user()->id)->get()->pluck('conversation_id');
+
+         $conversations = Conversation::with('participants')
+                             ->whereIn('id',$conversations_id)
+                            ->get()->pluck('id');
+
+         $conversations_list = Participant::whereIn('conversation_id',$conversations)->where('user_id','<>',$user_id)->get();
+
+         return response()->json($conversations_list);
+    }
+
+    public function sendMessage(Request $request){
+        $conversation = Conversation::where('id',$request->conversation_id)->first();
+        if($conversation) {
+            $request['sender_id'] = Auth::user()->id;
+            Message::create($request->all());
+
+            $request['channel_id']=$conversation->channel_id;
+
+            Event::fire(new MessageNotify($request));
         }
-        Event::fire(new MessageNotify($request));
 
-
-        return response()->json(['conversation'=>$reply,'success'=>true],$this->successStatus);
-    }
-
-    public function loadConversations($id){
-        $first_user = Conversation::with('conversation_replies')->where('user_id_one', Auth::user()->id)->where('user_id_two',$id)->first();
-        $second_user = Conversation::with('conversation_replies')->where('user_id_one', $id)->where('user_id_two', Auth::user()->id)->first();
-        return  response()->json($first_user?$first_user:$second_user);
-    }
-
-    public function getContacts(){
-        $users = User::where('id','<>',Auth::user()->id)->orderBy('display_name')->get();
-        return response()->json($users);
-    }
-
-    public function createGroup(Request $request){
-        $group= Group::create($request->all());
-
-        if($group){
-            $group->attach($request->users);
-        }
     }
 }

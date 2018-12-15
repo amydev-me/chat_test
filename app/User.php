@@ -38,13 +38,13 @@ class User extends Authenticatable
         return $this->hasMany(Conversation::class);
     }
 
-    public function conversation_replies()
+    public function messages()
     {
-        return $this->hasMany(ConversationReply::class);
+        return $this->hasMany(Message::class);
     }
 
-    public function groups()
+    public function participants()
     {
-        return $this->belongsToMany(Group::class);
+        return $this->hasMany(Participant::class);
     }
 }

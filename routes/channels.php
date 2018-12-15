@@ -14,3 +14,6 @@
 Broadcast::channel('chat-channel-{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+Broadcast::channel('group-chat-{id}', function ($user, \App\Group $group) {
+    return $group->hasUser($user->id);
+});

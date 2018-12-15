@@ -2,9 +2,7 @@
 
 namespace App\Events;
 
-use Carbon\Carbon;
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Encryption\Encrypter;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -12,7 +10,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Http\Request;
-class MessageNotify implements ShouldBroadcast
+class GroupMessage implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -23,9 +21,9 @@ class MessageNotify implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct($request)
     {
-        $this->request = $request->all();
+        $this->request = $request;
     }
 
     /**
@@ -35,15 +33,10 @@ class MessageNotify implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('chat-channel-' . $this->request['conversation_id']);
-//        ['chat-channel-' . $this->request['receiver_id']];
+        return new PrivateChannel('groups-chat-'.$this->request['group_id']);
     }
 
-    public function broadcastWith()
-    {
-//        $crypt = Encrypter::generateKey('abcd');
-        return [
-            'message' =>$this->request['message']
-        ];
+    public function broadcastWith(){
+        return $this->request;
     }
 }

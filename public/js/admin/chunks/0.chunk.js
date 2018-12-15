@@ -5669,15 +5669,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
 
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
         return {
+            is_group: false,
             typing_id: null,
             typing: false,
             is_typing: false,
@@ -5689,11 +5687,46 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             contacts: [],
             receiver_id: null,
             receiver_name: null,
-            socket: __WEBPACK_IMPORTED_MODULE_0_socket_io_client___default()('localhost:3000')
+            socket: __WEBPACK_IMPORTED_MODULE_0_socket_io_client___default()('localhost:3000'),
+            groups_contacts: [],
+            group_name: null,
+            selected: [],
+            groups: [],
+            conversations: [],
+            channel_id: null
+
         };
     },
 
     methods: {
+        getContacts: function getContacts() {
+            var _this = this;
+
+            axios.get('/api/get-contacts').then(function (_ref) {
+                var data = _ref.data;
+
+                _this.contacts = data;
+            });
+        },
+        getGroups: function getGroups() {
+            var _this2 = this;
+
+            axios.get('/api/get-groups').then(function (_ref2) {
+                var data = _ref2.data;
+
+                _this2.groups = data;
+            });
+        },
+        loadConversations: function loadConversations() {
+            var _this3 = this;
+
+            axios.get('/api/get-conversations').then(function (_ref3) {
+                var data = _ref3.data;
+
+                _this3.conversations = data;
+                // $(".messages").animate({scrollTop: $(document).height()}, "fast");
+            });
+        },
         onKeyUp: function onKeyUp(e) {
             if (e.keyCode === 13) {
                 this.sendConversations();
@@ -5721,76 +5754,81 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         bindClass: function bindClass(msg) {
 
-            if (this.user_id == msg.user_id) {
-                return 'replies';
-            } else {
-                return 'sent';
-            }
+            // if (this.user_id == msg.user_id) {
+            //     return 'replies'
+            // } else {
+            //     return 'sent'
+            // }
         },
         sendConversations: function sendConversations() {
-            var _this = this;
+            var _this4 = this;
 
-            if (this.message == '') {
+            if (this.message == '' || this.message == null) {
                 return;
             }
-            axios.post('/api/send-conversations', {
-                message: this.message,
-                receiver_id: this.receiver_id
-            }).then(function (_ref) {
-                var data = _ref.data;
 
-                _this.messages.push(data.conversation);
+            axios.post('/api/send-message', {
+                message: this.message,
+                message_type: 'text',
+                conversation_id: this.receiver_id
+            }).then(function (_ref4) {
+                var data = _ref4.data;
+
+                _this4.messages.push(data.conversation);
             });
+
             this.message = null;
-            $(".messages").animate({ scrollTop: $(document).height() }, "fast");
+            // $(".messages").animate({scrollTop: $(document).height()}, "fast");
         },
         onSocket: function onSocket() {
-            this.socket.on("private-chat-channel-" + this.user_id + ":App\\Events\\MessageNotify", function (data) {
-
+            this.socket.on("private-chat-channel-" + this.receiver_id + ":App\\Events\\MessageNotify", function (data) {
+                console.log(data);
                 this.messages.push(data);
             }.bind(this));
         },
         onListenTyping: function onListenTyping() {
             this.socket.on("client.typing." + this.user_id, function (data) {
-                console.log(data);
                 this.typing_id = data.sender_id;
                 this.typing = data.is_typing;
             }.bind(this));
-        },
-        getContacts: function getContacts() {
-            var _this2 = this;
-
-            axios.get('/api/get-contacts').then(function (_ref2) {
-                var data = _ref2.data;
-
-                _this2.contacts = data;
-            });
-        },
-        onClickedContact: function onClickedContact(contact) {
-            this.receiver_id = contact.id;
-            this.receiver_name = contact.display_name;
-            this.loadConversations();
-        },
-        loadConversations: function loadConversations() {
-            var _this3 = this;
-
-            axios.get('/api/get-conversations/' + this.receiver_id).then(function (_ref3) {
-                var data = _ref3.data;
-
-                _this3.messages = data.conversation_replies;
-                $(".messages").animate({ scrollTop: $(document).height() }, "fast");
-            });
         },
         onListenUserConnected: function onListenUserConnected() {
             this.socket.on("broadcast", function (data) {
                 console.log(data);
             }.bind(this));
         },
+        onListenGroupConversations: function onListenGroupConversations() {
+            this.socket.on("private-groups-chat-" + this.receiver_id + ":App\\Events\\GroupMessage", function (data) {
+                console.log(data);
+                this.messages.push(data);
+            }.bind(this));
+        },
         logout: function logout() {
             auth.logout();
         },
         showGroupDialog: function showGroupDialog() {
+            this.group_name = null;
+            this.selected = [];
+            this.groups_contacts = Array.from(Object.create(this.contacts));
             $('#myModal').modal('show');
+        },
+        createGroup: function createGroup() {
+            axios.post('/api/create-group', { group_name: this.group_name, users: this.selected }).then(function (_ref5) {
+                var data = _ref5.data;
+            });
+        },
+        onClickedContact: function onClickedContact(contact) {
+            this.is_group = false;
+            this.receiver_id = contact.conversation_id;
+            this.receiver_name = contact.contact_name;
+            this.onSocket();
+            // this.loadConversations();
+        },
+        onClickedGroup: function onClickedGroup(gp) {
+            this.is_group = true;
+            this.receiver_id = gp.id;
+            this.receiver_name = gp.group_name;
+            this.onListenGroupConversations();
         }
     },
     mounted: function mounted() {
@@ -5801,12 +5839,33 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
         this.user_id = auth.getAuthInfo().id;
         this.user_name = auth.getAuthInfo().display_name;
-        this.socket.on('broadcast', function (m) {
-            return console.log('Received broadcast:', m);
-        });
-        this.getContacts();
-        this.onSocket();
-        this.onListenTyping();
+
+        this.loadConversations();
+        // this.socket.on('broadcast', m => console.log('Received broadcast:', m));
+        // this.getContacts();
+        // this.getGroups();
+
+        // this.onListen    Typing();
+    },
+
+    computed: {
+        selectAll: {
+            get: function get() {
+                if (this.groups_contacts.length <= 0) {
+                    return false;
+                }
+                return this.groups_contacts ? this.selected.length == this.groups_contacts.length : false;
+            },
+            set: function set(value) {
+                var selected = [];
+                if (value) {
+                    this.groups_contacts.forEach(function (user) {
+                        selected.push(user);
+                    });
+                }
+                this.selected = selected;
+            }
+        }
     }
 });
 
@@ -9160,7 +9219,120 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { attrs: { id: "frame" } }, [
-    _vm._m(0),
+    _c(
+      "div",
+      { staticClass: "modal", attrs: { role: "dialog", id: "myModal" } },
+      [
+        _c(
+          "div",
+          { staticClass: "modal-dialog", attrs: { role: "document" } },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _vm._m(0),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.group_name,
+                      expression: "group_name"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: {
+                    type: "text",
+                    value: "group_name",
+                    placeholder: "Type Group Name"
+                  },
+                  domProps: { value: _vm.group_name },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.group_name = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "ul",
+                  _vm._l(_vm.groups_contacts, function(ctc, y) {
+                    return _c("li", { key: y }, [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.selected,
+                            expression: "selected"
+                          }
+                        ],
+                        attrs: { type: "checkbox" },
+                        domProps: {
+                          value: ctc.id,
+                          checked: Array.isArray(_vm.selected)
+                            ? _vm._i(_vm.selected, ctc.id) > -1
+                            : _vm.selected
+                        },
+                        on: {
+                          change: function($event) {
+                            var $$a = _vm.selected,
+                              $$el = $event.target,
+                              $$c = $$el.checked ? true : false
+                            if (Array.isArray($$a)) {
+                              var $$v = ctc.id,
+                                $$i = _vm._i($$a, $$v)
+                              if ($$el.checked) {
+                                $$i < 0 && (_vm.selected = $$a.concat([$$v]))
+                              } else {
+                                $$i > -1 &&
+                                  (_vm.selected = $$a
+                                    .slice(0, $$i)
+                                    .concat($$a.slice($$i + 1)))
+                              }
+                            } else {
+                              _vm.selected = $$c
+                            }
+                          }
+                        }
+                      }),
+                      _vm._v(
+                        "\n                            " +
+                          _vm._s(ctc.display_name)
+                      )
+                    ])
+                  })
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { type: "button" },
+                    on: { click: _vm.createGroup }
+                  },
+                  [_vm._v("Create Group")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button", "data-dismiss": "modal" }
+                  },
+                  [_vm._v("Close")]
+                )
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
     _vm._v(" "),
     _c("div", { attrs: { id: "sidepanel" } }, [
       _c("div", { attrs: { id: "profile" } }, [
@@ -9210,39 +9382,80 @@ var render = function() {
       _c("div", { attrs: { id: "contacts" } }, [
         _c(
           "ul",
-          _vm._l(_vm.contacts, function(contact) {
-            return _c(
-              "li",
-              {
-                staticClass: "contact",
-                on: {
-                  click: function($event) {
-                    _vm.onClickedContact(contact)
-                  }
-                }
-              },
-              [
-                _c("div", { staticClass: "wrap" }, [
-                  _c("span", { staticClass: "contact-status online" }),
-                  _vm._v(" "),
-                  _c("img", {
-                    attrs: {
-                      src: __webpack_require__(57),
-                      alt: ""
+          [
+            _vm._l(_vm.conversations, function(con) {
+              return _c(
+                "li",
+                {
+                  staticClass: "contact",
+                  on: {
+                    click: function($event) {
+                      _vm.onClickedContact(con)
                     }
-                  }),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "meta" }, [
-                    _c("p", { staticClass: "name" }, [
-                      _vm._v(_vm._s(contact.display_name))
-                    ]),
+                  }
+                },
+                [
+                  _c("div", { staticClass: "wrap" }, [
+                    _c("span", { staticClass: "contact-status online" }),
                     _vm._v(" "),
-                    _c("p", { staticClass: "preview" }, [_vm._v("Hay!!!")])
+                    _c("img", {
+                      attrs: {
+                        src: __webpack_require__(57),
+                        alt: ""
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "meta" }, [
+                      _c("p", { staticClass: "name" }, [
+                        _vm._v(
+                          "\n                                " +
+                            _vm._s(con.contact_name) +
+                            "\n                            "
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("p", { staticClass: "preview" }, [_vm._v("Hay!!!")])
+                    ])
                   ])
-                ])
-              ]
-            )
-          })
+                ]
+              )
+            }),
+            _vm._v(" "),
+            _vm._l(_vm.groups, function(gp) {
+              return _c(
+                "li",
+                {
+                  staticClass: "contact",
+                  on: {
+                    click: function($event) {
+                      _vm.onClickedGroup(gp)
+                    }
+                  }
+                },
+                [
+                  _c("div", { staticClass: "wrap" }, [
+                    _c("span", { staticClass: "contact-status online" }),
+                    _vm._v(" "),
+                    _c("img", {
+                      attrs: {
+                        src: __webpack_require__(57),
+                        alt: ""
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "meta" }, [
+                      _c("p", { staticClass: "name" }, [
+                        _vm._v(_vm._s(gp.group_name))
+                      ]),
+                      _vm._v(" "),
+                      _c("p", { staticClass: "preview" }, [_vm._v("Hay!!!")])
+                    ])
+                  ])
+                ]
+              )
+            })
+          ],
+          2
         )
       ]),
       _vm._v(" "),
@@ -9276,7 +9489,7 @@ var render = function() {
             _c(
               "ul",
               _vm._l(_vm.messages, function(msg) {
-                return _c("li", { class: _vm.bindClass(msg) }, [
+                return _c("li", [
                   _c("img", {
                     attrs: { src: __webpack_require__(52), alt: "" }
                   }),
@@ -9337,63 +9550,22 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "modal", attrs: { role: "dialog", id: "myModal" } },
-      [
-        _c(
-          "div",
-          { staticClass: "modal-dialog", attrs: { role: "document" } },
-          [
-            _c("div", { staticClass: "modal-content" }, [
-              _c("div", { staticClass: "modal-header" }, [
-                _c("h5", { staticClass: "modal-title" }, [
-                  _vm._v("Modal title")
-                ]),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    staticClass: "close",
-                    attrs: {
-                      type: "button",
-                      "data-dismiss": "modal",
-                      "aria-label": "Close"
-                    }
-                  },
-                  [
-                    _c("span", { attrs: { "aria-hidden": "true" } }, [
-                      _vm._v("×")
-                    ])
-                  ]
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "modal-body" }, [
-                _c("p", [_vm._v("Modal body text goes here.")])
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "modal-footer" }, [
-                _c(
-                  "button",
-                  { staticClass: "btn btn-primary", attrs: { type: "button" } },
-                  [_vm._v("Save changes")]
-                ),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-secondary",
-                    attrs: { type: "button", "data-dismiss": "modal" }
-                  },
-                  [_vm._v("Close")]
-                )
-              ])
-            ])
-          ]
-        )
-      ]
-    )
+    return _c("div", { staticClass: "modal-header" }, [
+      _c("h5", { staticClass: "modal-title" }, [_vm._v("Modal title")]),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "close",
+          attrs: {
+            type: "button",
+            "data-dismiss": "modal",
+            "aria-label": "Close"
+          }
+        },
+        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+      )
+    ])
   },
   function() {
     var _vm = this
