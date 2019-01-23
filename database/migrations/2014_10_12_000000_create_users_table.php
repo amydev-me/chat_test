@@ -18,6 +18,9 @@ class CreateUsersTable extends Migration
             $table->string('display_name');
             $table->string('phone')->unique();
             $table->string('password');
+            $table->boolean('in_active')->default(0);
+            $table->timestamp('inactive_at')->nullable();
+            $table->timestamp('last_online')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

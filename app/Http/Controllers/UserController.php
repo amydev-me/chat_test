@@ -82,6 +82,9 @@ class UserController extends Controller
 
             Event::fire(new MessageNotify($request));
         }
+    }
+
+    public function test(){
 
     }
 }

@@ -6,17 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Conversation extends Model
 {
-    protected $fillable=[
-        'channel_id',
-        'title',
-        'creator_id'
-    ];
+    protected  $fillable=['creator_id','channel_id','title','conversation_type'];
 
-    public function creator(){
-        return $this->belongsTo(User::class,'creator_id');
-    }
-
-    public function participants(){
-        return $this->hasMany(Participant::class);
-    }
 }

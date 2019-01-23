@@ -14,15 +14,18 @@ class CreateMessagesTable extends Migration
     public function up()
     {
         Schema::create('messages', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('conversation_id');
+            $table->uuid('id');
             $table->unsignedInteger('sender_id');
-            $table->string('message_type',50);
-            $table->mediumText('message');
-            $table->string('attachment_thumb_url')->nullable();
-            $table->string('attachment_url')->nullable();
+            $table->timestamp('send_at')->nullable();
+            $table->timestamp('end_at')->nullable();
+            $table->enum('message_type', ['text', 'voice', 'image', 'video'])->nullable();
+            $table->enum('status', ['delivered', 'seen', 'send'])->nullable();
+            $table->string('thumb_url', 255)->nullable();
+            $table->integer('messagetable_id')->nullable();
+            $table->string('messagetable_type')->nullable();
+            $table->boolean('is_read')->default(0);
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
-            $table->foreign('conversation_id')->references('id')->on('conversations');
             $table->foreign('sender_id')->references('id')->on('users');
         });
     }

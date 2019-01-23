@@ -35,7 +35,7 @@ class MessageNotify implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('chat-channel-' . $this->request['conversation_id']);
+        return new PrivateChannel('chat-channel-123456');
 //        ['chat-channel-' . $this->request['receiver_id']];
     }
 

@@ -113,12 +113,13 @@
 </template>
 <script>
     import io from 'socket.io-client';
-
+    var ALICE_ADDRESS = new libsignal.SignalProtocolAddress("xxxxxxxxx", 1);
+    var BOB_ADDRESS   = new libsignal.SignalProtocolAddress("yyyyyyyyyyyyy", 1);
 
     export default {
         data() {
             return {
-                is_group:false,
+                is_group: false,
                 typing_id: null,
                 typing: false,
                 is_typing: false,
@@ -131,12 +132,12 @@
                 receiver_id: null,
                 receiver_name: null,
                 socket: io('localhost:3000'),
-                groups_contacts:[],
-                group_name:null,
-                selected:[],
-                groups:[],
-                conversations:[],
-                channel_id:null
+                groups_contacts: [],
+                group_name: null,
+                selected: [],
+                groups: [],
+                conversations: [],
+                channel_id: null
 
             };
         },
@@ -146,11 +147,13 @@
                     this.contacts = data;
                 });
             },
-            getGroups(){
+
+            getGroups() {
                 axios.get('/api/get-groups').then(({data}) => {
                     this.groups = data;
                 });
             },
+
             loadConversations() {
                 axios.get('/api/get-conversations').then(({data}) => {
                     this.conversations = data;
@@ -158,18 +161,27 @@
                 });
 
             },
+
             onKeyUp(e) {
                 if (e.keyCode === 13) {
                     this.sendConversations();
                 } else {
                     if (!this.is_typing) {
                         this.is_typing = true;
-                        this.socket.emit("typing", {is_typing: true, receiver_id: this.receiver_id,sender_id:this.user_id});
+                        this.socket.emit("typing", {
+                            is_typing: true,
+                            receiver_id: this.receiver_id,
+                            sender_id: this.user_id
+                        });
                         var that = this;
                         this.time_out = setTimeout(function () {
                             that.is_typing = false;
                             // that.typing_id = null;
-                            that.socket.emit("typing", {is_typing: false, receiver_id: that.receiver_id,sender_id:this.user_id});
+                            that.socket.emit("typing", {
+                                is_typing: false,
+                                receiver_id: that.receiver_id,
+                                sender_id: this.user_id
+                            });
                         }, 5000)
                     } else {
                         var that = this;
@@ -178,11 +190,16 @@
                         this.time_out = setTimeout(function () {
                             that.is_typing = false;
                             // that.typing_id = null;
-                            that.socket.emit("typing", {is_typing: false, receiver_id: that.receiver_id,sender_id:this.user_id});
+                            that.socket.emit("typing", {
+                                is_typing: false,
+                                receiver_id: that.receiver_id,
+                                sender_id: this.user_id
+                            });
                         }, 5000)
                     }
                 }
             },
+
             bindClass(msg) {
 
                 // if (this.user_id == msg.user_id) {
@@ -191,30 +208,32 @@
                 //     return 'sent'
                 // }
             },
+
             sendConversations() {
-                if (this.message == '' || this.message ==null) {
+                if (this.message == '' || this.message == null) {
                     return;
                 }
 
-
-
                 axios.post('/api/send-message', {
                     message: this.message,
-                    message_type:'text',
+                    message_type: 'text',
                     conversation_id: this.receiver_id
+
                 }).then(({data}) => {
-                    this.messages.push(data.conversation);
+                    // this.messages.push(data.conversation);
                 });
-
-
                 this.message = null;
                 // $(".messages").animate({scrollTop: $(document).height()}, "fast");
             },
             onSocket() {
-                this.socket.on("private-chat-channel-" + this.receiver_id + ":App\\Events\\MessageNotify", function (data) {
-                    console.log(data)
+                this.socket.on("private-chat-channel-123456:App\\Events\\MessageNotify", function (data) {
+
                     this.messages.push(data);
                 }.bind(this));
+                // this.socket.on("private-chat-channel-" + this.receiver_id + ":App\\Events\\MessageNotify", function (data) {
+                //     console.log(data)
+                //     this.messages.push(data);
+                // }.bind(this));
             },
             onListenTyping() {
                 this.socket.on("client.typing." + this.user_id, function (data) {
@@ -222,13 +241,13 @@
                     this.typing = data.is_typing;
                 }.bind(this));
             },
-            onListenUserConnected(){
+            onListenUserConnected() {
                 this.socket.on("broadcast", function (data) {
                     console.log(data)
                 }.bind(this));
             },
-            onListenGroupConversations(){
-                this.socket.on("private-groups-chat-" + this.receiver_id +":App\\Events\\GroupMessage", function (data) {
+            onListenGroupConversations() {
+                this.socket.on("private-groups-chat-" + this.receiver_id + ":App\\Events\\GroupMessage", function (data) {
                     console.log(data)
                     this.messages.push(data);
                 }.bind(this));
@@ -237,29 +256,77 @@
                 auth.logout();
             },
             showGroupDialog() {
-                this.group_name=null;
-                this.selected=[];
+                this.group_name = null;
+                this.selected = [];
                 this.groups_contacts = Array.from(Object.create(this.contacts));
                 $('#myModal').modal('show');
             },
 
-            createGroup(){
-                axios.post('/api/create-group',{group_name: this.group_name,users:this.selected}).then(({data})=>{
+            createGroup() {
+                axios.post('/api/create-group', {group_name: this.group_name, users: this.selected}).then(({data}) => {
 
                 });
             },
+
             onClickedContact(contact) {
-                this.is_group=false;
+                this.is_group = false;
                 this.receiver_id = contact.conversation_id;
                 this.receiver_name = contact.contact_name;
-                this.onSocket();
+                this.channel_id = contact.channel_name;
+                // this.onSocket();
                 // this.loadConversations();
             },
-            onClickedGroup(gp){
-                this.is_group=true;
+
+            onClickedGroup(gp) {
+                this.is_group = true;
                 this.receiver_id = gp.id;
                 this.receiver_name = gp.group_name;
                 this.onListenGroupConversations();
+            },
+
+            generateIdentity(store) {
+                return Promise.all([
+                    KeyHelper.generateIdentityKeyPair(),
+                    KeyHelper.generateRegistrationId(),
+                ]).then(function(result) {
+                    store.put('identityKey', result[0]);
+                    store.put('registrationId', result[1]);
+                });
+            },
+
+            generatePreKeyBundle(store, preKeyId, signedPreKeyId) {
+                return Promise.all([
+                    store.getIdentityKeyPair(),
+                    store.getLocalRegistrationId()
+                ]).then(function(result) {
+                    var identity = result[0];
+                    var registrationId = result[1];
+
+                    return Promise.all([
+                        KeyHelper.generatePreKey(preKeyId),
+                        KeyHelper.generateSignedPreKey(identity, signedPreKeyId),
+                    ]).then(function(keys) {
+                        var preKey = keys[0]
+                        var signedPreKey = keys[1];
+
+                        store.storePreKey(preKeyId, preKey.keyPair);
+                        store.storeSignedPreKey(signedPreKeyId, signedPreKey.keyPair);
+
+                        return {
+                            identityKey: identity.pubKey,
+                            registrationId : registrationId,
+                            preKey:  {
+                                keyId     : preKeyId,
+                                publicKey : preKey.keyPair.pubKey
+                            },
+                            signedPreKey: {
+                                keyId     : signedPreKeyId,
+                                publicKey : signedPreKey.keyPair.pubKey,
+                                signature : signedPreKey.signature
+                            }
+                        };
+                    });
+                });
             }
         },
         mounted() {
@@ -272,16 +339,33 @@
             this.user_name = auth.getAuthInfo().display_name;
 
             this.loadConversations();
+            var that = this;
+
+            this.onSocket();
+
+            var KeyHelper = signal.KeyHelper;
+            var registrationId = KeyHelper.generateRegistrationId();
+
+
+            // var room = "abc123";
+            // this.socket.on('connect', function () {
+            //     // Connected, let's sign-up for to receive messages for this room
+            //     that.socket.emit('room', room);
+            // });
+
+            // this.socket.on('message', function (data) {
+            //     console.log('Incoming message:', data);
+            // });
+
             // this.socket.on('broadcast', m => console.log('Received broadcast:', m));
             // this.getContacts();
             // this.getGroups();
-
             // this.onListen    Typing();
         },
-        computed:{
+        computed: {
             selectAll: {
                 get: function () {
-                    if(this.groups_contacts.length<=0){
+                    if (this.groups_contacts.length <= 0) {
                         return false;
                     }
                     return this.groups_contacts ? this.selected.length == this.groups_contacts.length : false;

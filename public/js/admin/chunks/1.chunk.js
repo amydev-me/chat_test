@@ -52,7 +52,7 @@ module.exports = Component.exports
 
 /***/ }),
 
-/***/ 49:
+/***/ 50:
 /***/ (function(module, exports) {
 
 /*
@@ -135,7 +135,7 @@ function toComment(sourceMap) {
 
 /***/ }),
 
-/***/ 50:
+/***/ 51:
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -154,7 +154,7 @@ if (typeof DEBUG !== 'undefined' && DEBUG) {
   ) }
 }
 
-var listToStyles = __webpack_require__(51)
+var listToStyles = __webpack_require__(52)
 
 /*
 type StyleObject = {
@@ -364,7 +364,7 @@ function applyToTag (styleElement, obj) {
 
 /***/ }),
 
-/***/ 51:
+/***/ 52:
 /***/ (function(module, exports) {
 
 /**
@@ -398,7 +398,7 @@ module.exports = function listToStyles (parentId, list) {
 
 /***/ }),
 
-/***/ 52:
+/***/ 53:
 /***/ (function(module, exports) {
 
 module.exports = "/images/wow.jpg?e86f2667106783722fb7cf306e7275f3";
@@ -415,7 +415,7 @@ var content = __webpack_require__(71);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(50)("54b32a14", content, false, {});
+var update = __webpack_require__(51)("54b32a14", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -435,7 +435,7 @@ if(false) {
 /***/ 71:
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(49)(false);
+exports = module.exports = __webpack_require__(50)(false);
 // imports
 
 
@@ -584,7 +584,7 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("p", { staticClass: "h5" }, [
       _c("img", {
-        attrs: { src: __webpack_require__(52), width: "30%" }
+        attrs: { src: __webpack_require__(53), width: "30%" }
       })
     ])
   }

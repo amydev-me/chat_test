@@ -131,6 +131,7 @@ window.axios = __webpack_require__(5);
 window.auth = __webpack_require__(35);
 
 
+
 __webpack_require__(40);
 new Vue({
     router: __WEBPACK_IMPORTED_MODULE_1__router__["a" /* default */],

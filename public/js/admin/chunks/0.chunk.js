@@ -1090,6 +1090,12 @@ module.exports = function(a, b){
 /* 49 */
 /***/ (function(module, exports) {
 
+module.exports = "/images/blank-avatar.png?35aaebaa72968946655fae4682cda755";
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports) {
+
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra
@@ -1169,7 +1175,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -1188,7 +1194,7 @@ if (typeof DEBUG !== 'undefined' && DEBUG) {
   ) }
 }
 
-var listToStyles = __webpack_require__(51)
+var listToStyles = __webpack_require__(52)
 
 /*
 type StyleObject = {
@@ -1397,7 +1403,7 @@ function applyToTag (styleElement, obj) {
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports) {
 
 /**
@@ -1430,13 +1436,13 @@ module.exports = function listToStyles (parentId, list) {
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports) {
 
 module.exports = "/images/wow.jpg?e86f2667106783722fb7cf306e7275f3";
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -1857,7 +1863,7 @@ function error(msg) {
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3654,7 +3660,7 @@ function isnan (val) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // browser shim for xmlhttprequest module
@@ -3697,7 +3703,7 @@ module.exports = function (opts) {
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -3863,12 +3869,6 @@ Transport.prototype.onClose = function () {
 
 
 /***/ }),
-/* 57 */
-/***/ (function(module, exports) {
-
-module.exports = "/images/blank-avatar.png?35aaebaa72968946655fae4682cda755";
-
-/***/ }),
 /* 58 */
 /***/ (function(module, exports) {
 
@@ -3949,7 +3949,7 @@ function isBuf(obj) {
           (withNativeArrayBuffer && (obj instanceof ArrayBuffer || isView(obj)));
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(54).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(55).Buffer))
 
 /***/ }),
 /* 61 */
@@ -3963,7 +3963,7 @@ function isBuf(obj) {
 var eio = __webpack_require__(85);
 var Socket = __webpack_require__(67);
 var Emitter = __webpack_require__(45);
-var parser = __webpack_require__(53);
+var parser = __webpack_require__(54);
 var on = __webpack_require__(68);
 var bind = __webpack_require__(69);
 var debug = __webpack_require__(44)('socket.io-client:manager');
@@ -4538,7 +4538,7 @@ Manager.prototype.onreconnect = function () {
  * Module dependencies
  */
 
-var XMLHttpRequest = __webpack_require__(55);
+var XMLHttpRequest = __webpack_require__(56);
 var XHR = __webpack_require__(88);
 var JSONP = __webpack_require__(96);
 var websocket = __webpack_require__(97);
@@ -4597,7 +4597,7 @@ function polling (opts) {
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(56);
+var Transport = __webpack_require__(57);
 var parseqs = __webpack_require__(47);
 var parser = __webpack_require__(46);
 var inherit = __webpack_require__(48);
@@ -4615,7 +4615,7 @@ module.exports = Polling;
  */
 
 var hasXHR2 = (function () {
-  var XMLHttpRequest = __webpack_require__(55);
+  var XMLHttpRequest = __webpack_require__(56);
   var xhr = new XMLHttpRequest({ xdomain: false });
   return null != xhr.responseType;
 })();
@@ -4909,7 +4909,7 @@ function hasBinary (obj) {
   return false;
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(54).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(55).Buffer))
 
 /***/ }),
 /* 65 */
@@ -5010,7 +5010,7 @@ module.exports = function(arr, obj){
  * Module dependencies.
  */
 
-var parser = __webpack_require__(53);
+var parser = __webpack_require__(54);
 var Emitter = __webpack_require__(45);
 var toArray = __webpack_require__(99);
 var on = __webpack_require__(68);
@@ -5519,7 +5519,7 @@ var content = __webpack_require__(75);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(50)("d9625462", content, false, {});
+var update = __webpack_require__(51)("d9625462", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -5538,7 +5538,7 @@ if(false) {
 /* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(49)(false);
+exports = module.exports = __webpack_require__(50)(false);
 // imports
 
 
@@ -5733,12 +5733,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             } else {
                 if (!this.is_typing) {
                     this.is_typing = true;
-                    this.socket.emit("typing", { is_typing: true, receiver_id: this.receiver_id, sender_id: this.user_id });
+                    this.socket.emit("typing", {
+                        is_typing: true,
+                        receiver_id: this.receiver_id,
+                        sender_id: this.user_id
+                    });
                     var that = this;
                     this.time_out = setTimeout(function () {
                         that.is_typing = false;
                         // that.typing_id = null;
-                        that.socket.emit("typing", { is_typing: false, receiver_id: that.receiver_id, sender_id: this.user_id });
+                        that.socket.emit("typing", {
+                            is_typing: false,
+                            receiver_id: that.receiver_id,
+                            sender_id: this.user_id
+                        });
                     }, 5000);
                 } else {
                     var that = this;
@@ -5747,7 +5755,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     this.time_out = setTimeout(function () {
                         that.is_typing = false;
                         // that.typing_id = null;
-                        that.socket.emit("typing", { is_typing: false, receiver_id: that.receiver_id, sender_id: this.user_id });
+                        that.socket.emit("typing", {
+                            is_typing: false,
+                            receiver_id: that.receiver_id,
+                            sender_id: this.user_id
+                        });
                     }, 5000);
                 }
             }
@@ -5761,8 +5773,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             // }
         },
         sendConversations: function sendConversations() {
-            var _this4 = this;
-
             if (this.message == '' || this.message == null) {
                 return;
             }
@@ -5771,20 +5781,24 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 message: this.message,
                 message_type: 'text',
                 conversation_id: this.receiver_id
+
             }).then(function (_ref4) {
+                // this.messages.push(data.conversation);
+
                 var data = _ref4.data;
-
-                _this4.messages.push(data.conversation);
             });
-
             this.message = null;
             // $(".messages").animate({scrollTop: $(document).height()}, "fast");
         },
         onSocket: function onSocket() {
-            this.socket.on("private-chat-channel-" + this.receiver_id + ":App\\Events\\MessageNotify", function (data) {
-                console.log(data);
+            this.socket.on("private-chat-channel-123456:App\\Events\\MessageNotify", function (data) {
+
                 this.messages.push(data);
             }.bind(this));
+            // this.socket.on("private-chat-channel-" + this.receiver_id + ":App\\Events\\MessageNotify", function (data) {
+            //     console.log(data)
+            //     this.messages.push(data);
+            // }.bind(this));
         },
         onListenTyping: function onListenTyping() {
             this.socket.on("client.typing." + this.user_id, function (data) {
@@ -5821,7 +5835,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.is_group = false;
             this.receiver_id = contact.conversation_id;
             this.receiver_name = contact.contact_name;
-            this.onSocket();
+            this.channel_id = contact.channel_name;
+            // this.onSocket();
             // this.loadConversations();
         },
         onClickedGroup: function onClickedGroup(gp) {
@@ -5841,10 +5856,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.user_name = auth.getAuthInfo().display_name;
 
         this.loadConversations();
+        var that = this;
+
+        this.onSocket();
+        // var room = "abc123";
+        // this.socket.on('connect', function () {
+        //     // Connected, let's sign-up for to receive messages for this room
+        //     that.socket.emit('room', room);
+        // });
+
+        // this.socket.on('message', function (data) {
+        //     console.log('Incoming message:', data);
+        // });
+
         // this.socket.on('broadcast', m => console.log('Received broadcast:', m));
         // this.getContacts();
         // this.getGroups();
-
         // this.onListen    Typing();
     },
 
@@ -5879,7 +5906,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  */
 
 var url = __webpack_require__(78);
-var parser = __webpack_require__(53);
+var parser = __webpack_require__(54);
 var Manager = __webpack_require__(61);
 var debug = __webpack_require__(44)('socket.io-client');
 
@@ -7010,7 +7037,7 @@ Socket.protocol = parser.protocol; // this is an int
  */
 
 Socket.Socket = Socket;
-Socket.Transport = __webpack_require__(56);
+Socket.Transport = __webpack_require__(57);
 Socket.transports = __webpack_require__(62);
 Socket.parser = __webpack_require__(46);
 
@@ -7646,7 +7673,7 @@ try {
  * Module requirements.
  */
 
-var XMLHttpRequest = __webpack_require__(55);
+var XMLHttpRequest = __webpack_require__(56);
 var Polling = __webpack_require__(63);
 var Emitter = __webpack_require__(45);
 var inherit = __webpack_require__(48);
@@ -8811,7 +8838,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(56);
+var Transport = __webpack_require__(57);
 var parser = __webpack_require__(46);
 var parseqs = __webpack_require__(47);
 var inherit = __webpack_require__(48);
@@ -9092,7 +9119,7 @@ WS.prototype.check = function () {
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(54).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(55).Buffer))
 
 /***/ }),
 /* 98 */
@@ -9341,7 +9368,7 @@ var render = function() {
             staticClass: "online",
             attrs: {
               id: "profile-img",
-              src: __webpack_require__(57),
+              src: __webpack_require__(49),
               alt: ""
             }
           }),
@@ -9400,7 +9427,7 @@ var render = function() {
                     _vm._v(" "),
                     _c("img", {
                       attrs: {
-                        src: __webpack_require__(57),
+                        src: __webpack_require__(49),
                         alt: ""
                       }
                     }),
@@ -9438,7 +9465,7 @@ var render = function() {
                     _vm._v(" "),
                     _c("img", {
                       attrs: {
-                        src: __webpack_require__(57),
+                        src: __webpack_require__(49),
                         alt: ""
                       }
                     }),
@@ -9472,7 +9499,7 @@ var render = function() {
       ? _c("div", { staticClass: "content" }, [
           _c("div", { staticClass: "contact-profile" }, [
             _c("img", {
-              attrs: { src: __webpack_require__(57), alt: "" }
+              attrs: { src: __webpack_require__(49), alt: "" }
             }),
             _vm._v(" "),
             _c("p", [
@@ -9491,7 +9518,7 @@ var render = function() {
               _vm._l(_vm.messages, function(msg) {
                 return _c("li", [
                   _c("img", {
-                    attrs: { src: __webpack_require__(52), alt: "" }
+                    attrs: { src: __webpack_require__(53), alt: "" }
                   }),
                   _vm._v(" "),
                   _c("p", [_vm._v(_vm._s(msg.message))])

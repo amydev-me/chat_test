@@ -15,11 +15,12 @@ class CreateConversationsTable extends Migration
     {
         Schema::create('conversations', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('creator_id');
+            $table->string('channel_id');
             $table->string('title')->nullable();
-            $table->unsignedInteger('creator_id')->nullable();
-            $table->string('channel_id',50)->nullable();
+            $table->enum('conversation_type',['group','single'])->nullable();
+            $table->foreign('creator_id')->references('id')->on('users');
             $table->timestamps();
-            $table->foreign('creator_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 
