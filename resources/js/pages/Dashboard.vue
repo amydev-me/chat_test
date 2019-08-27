@@ -113,8 +113,8 @@
 </template>
 <script>
     import io from 'socket.io-client';
-    var ALICE_ADDRESS = new libsignal.SignalProtocolAddress("xxxxxxxxx", 1);
-    var BOB_ADDRESS   = new libsignal.SignalProtocolAddress("yyyyyyyyyyyyy", 1);
+    // var ALICE_ADDRESS = new libsignal.SignalProtocolAddress("xxxxxxxxx", 1);
+    // var BOB_ADDRESS   = new libsignal.SignalProtocolAddress("yyyyyyyyyyyyy", 1);
 
     export default {
         data() {
@@ -131,7 +131,7 @@
                 contacts: [],
                 receiver_id: null,
                 receiver_name: null,
-                socket: io('localhost:3000'),
+                socket: io('ec2-54-169-141-37.ap-southeast-1.compute.amazonaws.com:3000'),
                 groups_contacts: [],
                 group_name: null,
                 selected: [],
@@ -274,7 +274,7 @@
                 this.receiver_name = contact.contact_name;
                 this.channel_id = contact.channel_name;
                 // this.onSocket();
-                // this.loadConversations();
+                this.loadConversations();
             },
 
             onClickedGroup(gp) {
@@ -284,50 +284,50 @@
                 this.onListenGroupConversations();
             },
 
-            generateIdentity(store) {
-                return Promise.all([
-                    KeyHelper.generateIdentityKeyPair(),
-                    KeyHelper.generateRegistrationId(),
-                ]).then(function(result) {
-                    store.put('identityKey', result[0]);
-                    store.put('registrationId', result[1]);
-                });
-            },
+            // generateIdentity(store) {
+            //     return Promise.all([
+            //         KeyHelper.generateIdentityKeyPair(),
+            //         KeyHelper.generateRegistrationId(),
+            //     ]).then(function(result) {
+            //         store.put('identityKey', result[0]);
+            //         store.put('registrationId', result[1]);
+            //     });
+            // },
 
-            generatePreKeyBundle(store, preKeyId, signedPreKeyId) {
-                return Promise.all([
-                    store.getIdentityKeyPair(),
-                    store.getLocalRegistrationId()
-                ]).then(function(result) {
-                    var identity = result[0];
-                    var registrationId = result[1];
+            // generatePreKeyBundle(store, preKeyId, signedPreKeyId) {
+            //     return Promise.all([
+            //         store.getIdentityKeyPair(),
+            //         store.getLocalRegistrationId()
+            //     ]).then(function(result) {
+            //         var identity = result[0];
+            //         var registrationId = result[1];
 
-                    return Promise.all([
-                        KeyHelper.generatePreKey(preKeyId),
-                        KeyHelper.generateSignedPreKey(identity, signedPreKeyId),
-                    ]).then(function(keys) {
-                        var preKey = keys[0]
-                        var signedPreKey = keys[1];
+            //         return Promise.all([
+            //             KeyHelper.generatePreKey(preKeyId),
+            //             KeyHelper.generateSignedPreKey(identity, signedPreKeyId),
+            //         ]).then(function(keys) {
+            //             var preKey = keys[0]
+            //             var signedPreKey = keys[1];
 
-                        store.storePreKey(preKeyId, preKey.keyPair);
-                        store.storeSignedPreKey(signedPreKeyId, signedPreKey.keyPair);
+            //             store.storePreKey(preKeyId, preKey.keyPair);
+            //             store.storeSignedPreKey(signedPreKeyId, signedPreKey.keyPair);
 
-                        return {
-                            identityKey: identity.pubKey,
-                            registrationId : registrationId,
-                            preKey:  {
-                                keyId     : preKeyId,
-                                publicKey : preKey.keyPair.pubKey
-                            },
-                            signedPreKey: {
-                                keyId     : signedPreKeyId,
-                                publicKey : signedPreKey.keyPair.pubKey,
-                                signature : signedPreKey.signature
-                            }
-                        };
-                    });
-                });
-            }
+            //             return {
+            //                 identityKey: identity.pubKey,
+            //                 registrationId : registrationId,
+            //                 preKey:  {
+            //                     keyId     : preKeyId,
+            //                     publicKey : preKey.keyPair.pubKey
+            //                 },
+            //                 signedPreKey: {
+            //                     keyId     : signedPreKeyId,
+            //                     publicKey : signedPreKey.keyPair.pubKey,
+            //                     signature : signedPreKey.signature
+            //                 }
+            //             };
+            //         });
+            //     });
+            // }
         },
         mounted() {
             $(".expand-button").click(function () {
@@ -343,8 +343,8 @@
 
             this.onSocket();
 
-            var KeyHelper = signal.KeyHelper;
-            var registrationId = KeyHelper.generateRegistrationId();
+            // var KeyHelper = signal.KeyHelper;
+            // var registrationId = KeyHelper.generateRegistrationId();
 
 
             // var room = "abc123";

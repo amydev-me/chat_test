@@ -129,7 +129,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 window.Vue = __webpack_require__(2);
 window.axios = __webpack_require__(5);
 window.auth = __webpack_require__(35);
-
+// window.signal = require('signal-protocol')
 
 
 __webpack_require__(40);
